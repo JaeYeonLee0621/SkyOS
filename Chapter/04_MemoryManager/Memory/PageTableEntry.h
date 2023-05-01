@@ -3,6 +3,7 @@
 
 namespace PageTableEntry
 {	
+	// Page Table Entry = 4byte
 	typedef uint32_t PTE;
 
 	enum PAGE_PTE_FLAGS 
@@ -24,8 +25,8 @@ namespace PageTableEntry
 	void AddAttribute(PTE* entry, uint32_t attr);
 	void DelAttribute(PTE* entry, uint32_t attr);
 	void SetFrame(PTE* entry, uint32_t addr);
-	bool IsPresent(PTE entry);
+	bool IsPresent(PTE entry); // memory 에 존재하는가
 	bool IsWritable(PTE entry);
-	uint32_t GetFrame(PTE entry);
+	uint32_t GetFrame(PTE entry); // Physical memory address 를 얻음
 
 };

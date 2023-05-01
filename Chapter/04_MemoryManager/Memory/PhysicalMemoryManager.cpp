@@ -1,12 +1,16 @@
 ﻿#include "SkyOS.h"
 #include "Exception.h"
 
+
+// singleton 느낌이 나도록 namespace 사용
+
 namespace PhysicalMemoryManager
 {
 	uint32_t	m_memorySize = 0;
 	uint32_t	m_usedBlocks = 0;
 
 	//이용할 수 있는 최대 블럭 갯수
+	// 128MB / 4KB
 	uint32_t	m_maxBlocks = 0;
 
 	//비트맵 배열, 각 비트는 메모리 블럭을 표현, 비트맵처리
@@ -118,9 +122,15 @@ namespace PhysicalMemoryManager
 	{
 		SkyConsole::Print("Physical Memory Manager Init..\n");
 
+		// 전체 Memory size 를 알아냄
 		g_totalMemorySize = GetTotalMemory(bootinfo);
-		
+
+		// 사용된 block 의 수
+		// ex) 400KB memory 가 사용 중에 있으면 사용된 block 수는 100개
+
 		m_usedBlocks = 0;
+
+		// 자유 memory size (default : 128MB)
 		m_memorySize = g_totalMemorySize;
 		m_maxBlocks = m_memorySize / PMM_BLOCK_SIZE;
 
@@ -128,6 +138,16 @@ namespace PhysicalMemoryManager
 		if (pageCount == 0)
 			pageCount = 1;
 
+		/*
+
+		[m_pMemoryMap]
+		- 특정 블록이 사용되고 있는지 여부를 알 수 있는 bitmap 배열
+
+		[GetKernelEnd]
+		- Kernel System 의 마지막 주소
+
+		*/
+		
 		m_pMemoryMap = (uint32_t*)GetKernelEnd(bootinfo);
 
 		SkyConsole::Print("Total Memory (%dMB)\n", g_totalMemorySize / 1048576);
@@ -137,7 +157,7 @@ namespace PhysicalMemoryManager
 		//블럭들의 최대 수는 8의 배수로 맞추고 나머지는 버린다
 		//m_maxBlocks = m_maxBlocks - (m_maxBlocks % PMM_BLOCKS_PER_BYTE);
 
-		//메모리맵의 바이트크기
+		// 메모리맵의 바이트크기
 		m_memoryMapSize = m_maxBlocks / PMM_BLOCKS_PER_BYTE;
 		m_usedBlocks = GetTotalBlockCount();
 
@@ -148,9 +168,11 @@ namespace PhysicalMemoryManager
 
 		m_memoryMapSize = tempMemoryMapSize;
 
-		//모든 메모리 블럭들이 사용중에 있다고 설정한다.	
+		//모든 메모리 블럭들이 사용중에 있다고 설정한다.
 		unsigned char flag = 0xff;
 		memset((char*)m_pMemoryMap, flag, m_memoryMapSize);
+
+		//  이용 가능한 memory block 설정
 		SetAvailableMemory((uint32_t)m_pMemoryMap, m_memorySize);
 	}
 
@@ -262,23 +284,41 @@ namespace PhysicalMemoryManager
 	
 	void* AllocBlocks(size_t size)
 	{
+		// 이용할 수 있는 block 이 없다면 할당 실패
 		if (GetFreeBlockCount() <= size)
 		{
 			return NULL;
 		}
 
-		
+		// 사용되고 있지 않은 block 의 index 를 얻음		
 		int frame = GetFreeFrames(size);
 
+		// 유효하지 않은 index 라면 -1
 		if (frame == -1)
 		{
 			return NULL;	//연속된 빈 블럭들이 존재하지 않는다.
 		}
 
+		/*
+		
+		- memory bitmap 에 해당 block 이 사용되고 있음을 set
+		- 1bit 당 하나의 memory block 의 사용 여부를 나타냄
+		
+		ex) GetFreeFrames 으로 얻은 index 가 1301
+
+		- memory bitmap 은 4byte 당 32 개의 memory block 을 표현할 수 있음
+		- memory map 에 1301 이 사용되고 있음을 나타내려면
+		- 1301 / 32 = 40 .. 1
+		- 즉 40 번째 index 에 접근한 뒤 32bit 중 1번째 (0부터 시작) bit 를 1로 set
+
+		*/
 		for (uint32_t i = 0; i < size; i++)
 			SetBit(frame + i);
 
+		// 할당된 Physical memory address
 		uint32_t addr = frame * PMM_BLOCK_SIZE + (uint32_t)m_pMemoryMap;
+
+		// 사용된 block 의 개수를 증가
 		m_usedBlocks += size;
 
 		return (void*)addr;

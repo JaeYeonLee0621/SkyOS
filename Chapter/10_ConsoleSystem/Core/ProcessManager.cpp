@@ -77,12 +77,12 @@ Thread* ProcessManager::CreateThread(Process* pProcess, FILE* file, LPVOID param
 
 	pProcess->m_dwPageCount = (pThread->m_imageSize / 4096) + pageRest;
 
-	//파일을 메모리에 할당하는데 필요한 물리 메모리 할당
+	// 파일을 메모리에 할당하는데 필요한 물리 메모리 할당
 	unsigned char* physicalMemory = (unsigned char*)PhysicalMemoryManager::AllocBlocks(pProcess->m_dwPageCount);
 
-//물리주소를 가상주소로 매핑한다
-//주의 현재 실행중인 프로세스의 가상주소와 생성될 프로세스의 가상주소에 로드된 실행파일의 물리주소를 똑같이 매핑한 후
-//복사가 완료되면 현재 실행중인 프로세스에 생성된 PTE를 삭제한다.
+	// 물리주소를 가상주소로 매핑한다
+	// 주의 현재 실행중인 프로세스의 가상주소와 생성될 프로세스의 가상주소에 로드된 실행파일의 물리주소를 똑같이 매핑한 후
+	// 복사가 완료되면 현재 실행중인 프로세스에 생성된 PTE를 삭제한다.
 
 	for (DWORD i = 0; i < pProcess->m_dwPageCount; i++)
 	{

@@ -98,19 +98,19 @@ void HardwareInitialize()
 
 bool InitMemoryManager(multiboot_info* pBootInfo)
 {
-	//물리/가상 메모리 매니저를 초기화한다.
-	//기본 설정 시스템 메모리는 128MB
+	// 물리/가상 메모리 매니저를 초기화한다.
+	// 기본 설정 시스템 메모리는 128MB
 	SkyConsole::Print("Memory Manager Init Complete\n");
 
 	PhysicalMemoryManager::EnablePaging(false);
 
 	//물리 메모리 매니저 초기화
 	PhysicalMemoryManager::Initialize(pBootInfo);
-	//PhysicalMemoryManager::Dump();
+	// PhysicalMemoryManager::Dump();
 	
-	//가상 메모리 매니저 초기화	
+	// 가상 메모리 매니저 초기화	
 	VirtualMemoryManager::Initialize();
-	//PhysicalMemoryManager::Dump();
+	// PhysicalMemoryManager::Dump();
 
 	return true;
 }

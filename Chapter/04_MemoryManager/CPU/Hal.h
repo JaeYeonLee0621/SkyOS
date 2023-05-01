@@ -7,6 +7,7 @@
 #define interrupt
 #endif
 
+// Page size = 4KB 
 #define PAGE_SIZE 4096
 
 #define PAGE_ALIGN_DOWN(value)				((value) & ~(PAGE_SIZE - 1))

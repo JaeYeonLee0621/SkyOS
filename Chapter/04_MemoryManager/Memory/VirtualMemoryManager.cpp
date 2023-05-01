@@ -10,6 +10,19 @@
 PageDirectory* g_pageDirectoryPool[MAX_PAGE_DIRECTORY_COUNT];
 bool g_pageDirectoryAvailable[MAX_PAGE_DIRECTORY_COUNT];
 
+
+/*
+
+- Kernel 의 memory allocation 요청을 처리하는 창구 역할 담당
+- Physical memory manager 로부터 실제 memory space 를 확보해서 virtual address 와 physical address 를 mapping 하는 역할 담당
+
+[Virtual Memory Manager 의 핵심]
+1. Paging 에 대한 Structure 관리
+2. 할당된 Physical Address 를 Vitual Address 와 mapping
+3. Page Table 의 동적인 생성 및 삭제
+
+*/
+
 namespace VirtualMemoryManager
 {
 	//! current directory table
@@ -43,22 +56,33 @@ namespace VirtualMemoryManager
 		return true;
 	}
 
-	//PDE나 PTE의 플래그는 같은 값을 공유
-	//가상주소를 물리 주소에 매핑
+	// PDE나 PTE의 플래그는 같은 값을 공유
+	// 가상주소를 물리 주소에 매핑
+	// 첫 번째 Parameter : PageDirectory > Process 마다 1개의 Page Directory 존재
+	// 두 번째 Parameter : virtual address
+	// 세 번째 Parameter : physical address 
+	// 네 번째 Parameter : PDE (Page Directory Entry) 나 PTE (Page Table Entry) 를 설정
+	// 보통 I86_PTE_PRESENT (Page 가 Physical Memory 에 존재) or I86_PTE_WRITABLE (해당 memory 에 쓰기 가능) 으로 설정
 	void MapPhysicalAddressToVirtualAddresss(PageDirectory* dir, uint32_t virt, uint32_t phys, uint32_t flags)
 	{
 		kEnterCriticalSection();
 		PhysicalMemoryManager::EnablePaging(false);
 		PDE* pageDir = dir->m_entries;				
 
+		// 1. Page directory 에서 Page Directory Entry 를 가져옴
+		// 이 값이 0이면 Page table 이 없다고 판단
 		if (pageDir[virt >> 22] == 0)
 		{
 			CreatePageTable(dir, virt, flags);
 		}
 
 		uint32_t mask = (uint32_t)(~0xfff);
+
+		
 		uint32_t* pageTable = (uint32_t*)(pageDir[virt >> 22] & mask);
 
+		// Page Table 에서 PTE 를 구한 뒤 물리 주소와 Flag 설정
+		// Virtual Address 와 Physical Address mapping
 		pageTable[virt << 10 >> 10 >> 12] = phys | flags;
 
 		PhysicalMemoryManager::EnablePaging(true);
@@ -221,11 +245,15 @@ namespace VirtualMemoryManager
 	PageDirectory* CreateCommonPageDirectory()
 	{
 				
-		//페이지 디렉토리 생성. 가상주소 공간 
-		//4GB를 표현하기 위해서 페이지 디렉토리는 하나면 충분하다.
-		//페이지 디렉토리는 1024개의 페이지테이블을 가진다
-		//1024 * 1024(페이지 테이블 엔트리의 개수) * 4K(프레임의 크기) = 4G		
+		// 페이지 디렉토리 생성. 가상주소 공간 
+		// 4GB를 표현하기 위해서 페이지 디렉토리는 하나면 충분하다.
+		// 페이지 디렉토리는 1024개의 페이지 테이블을 가진다
+		// 1024 * 1024 (페이지 테이블 엔트리의 개수) * 4K(프레임의 크기) = 4G
+		// 자세한 내용은 ReadMe.md 를 읽으면 됨		
+
 		int index = 0;
+
+		// Page directory pool 에서 사용할 수 있는 Page directory 를 하나 얻어냄
 		for (; index < MAX_PAGE_DIRECTORY_COUNT; index++)
 		{
 		
@@ -241,13 +269,15 @@ namespace VirtualMemoryManager
 		if (dir == NULL)
 			return nullptr;
 
+		// 얻어낸 Page directory 는 사용 중임을 표시하고 초기화
 		g_pageDirectoryAvailable[index] = false;
 		memset(dir, 0, sizeof(PageDirectory));
 
-		uint32_t frame = 0x00000000;
-		uint32_t virt = 0x00000000;
+		uint32_t frame = 0x00000000; // Physical Address 시작 주소
+		uint32_t virt = 0x00000000; // Virtual Address 시작 주소
 
-		//페이지 테이블을 생성
+		// Page Table 2개 생성 
+		// => Virtual Address & Physical Address 가 같은 identity mapping 수행
 		for (int i = 0; i < 2; i++)
 		{			
 			PageTable* identityPageTable = (PageTable*)PhysicalMemoryManager::AllocBlock();
@@ -258,7 +288,7 @@ namespace VirtualMemoryManager
 
 			memset(identityPageTable, 0, sizeof(PageTable));
 			
-			//물리 주소를 가상 주소와 동일하게 매핑시킨다
+			// 물리 주소를 가상 주소와 동일하게 매핑시킨다
 			for (int j = 0; j < PAGES_PER_TABLE; j++, frame += PAGE_SIZE, virt += PAGE_SIZE)
 			{
 				PTE page = 0;
@@ -269,10 +299,10 @@ namespace VirtualMemoryManager
 				identityPageTable->m_entries[PAGE_TABLE_INDEX(virt)] = page;
 			}
 
-			//페이지 디렉토리에 페이지 디렉토리 엔트리(PDE)를 한 개 세트한다
-			//0번째 인덱스에 PDE를 세트한다(가상주소가 0X00000000일시 참조됨)
-			//앞에서 생성한 아이덴티티 페이지 테이블을 세트한다
-			//가상주소 = 물리주소
+			// 페이지 디렉토리에 페이지 디렉토리 엔트리(PDE)를 한 개 세트한다
+			// 0번째 인덱스에 PDE를 세트한다 (가상주소가 0X00000000 일시 참조됨)
+			// 앞에서 생성한 아이덴티티 페이지 테이블을 세트한다
+			// 가상주소 = 물리주소
 			PDE* identityEntry = &dir->m_entries[PAGE_DIRECTORY_INDEX((virt - 0x00400000))];
 			PageDirectoryEntry::AddAttribute(identityEntry, I86_PDE_PRESENT | I86_PDE_WRITABLE);			
 			PageDirectoryEntry::SetFrame(identityEntry, (uint32_t)identityPageTable);
@@ -294,12 +324,15 @@ namespace VirtualMemoryManager
 	{
 		SkyConsole::Print("Virtual Memory Manager Init..\n");
 
+		// Page Directory Pool 생성
 		for (int i = 0; i < MAX_PAGE_DIRECTORY_COUNT; i++)
 		{
 			g_pageDirectoryPool[i] = (PageDirectory*)PhysicalMemoryManager::AllocBlock();
 			g_pageDirectoryAvailable[i] = true;
 		}
 
+		// Page Directory 생성
+		// 다음 method 는 kernel area address mapping 까지 작업
 		PageDirectory* dir = CreateCommonPageDirectory();
 
 		if (nullptr == dir)

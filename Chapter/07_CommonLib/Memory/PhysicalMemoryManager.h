@@ -5,6 +5,8 @@
 #include "Hal.h"
 
 #define PMM_BLOCKS_PER_BYTE 8	
+
+// Block Size
 #define PMM_BLOCK_SIZE	4096	
 #define PMM_BLOCK_ALIGN	BLOCK_SIZE
 #define PMM_BITS_PER_INDEX	32
