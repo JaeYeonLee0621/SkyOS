@@ -110,7 +110,7 @@ PFILE StorageManager::OpenFile(const char* fileName, const char *mode)
 	if (m_pCurrentFileSystem == nullptr || fileName == nullptr)
 		return nullptr;
 	
-	//ÆÄÀÏÀ» »ç¿ëÇÒ ¼ö ÀÖÀ¸¸é µð¹ÙÀÌ½º ¾ÆÀÌµð¸¦ ¼¼ÆÃÇÏ°í ¸®ÅÏÇÑ´Ù.		
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.		
 	PFILE pFile = m_pCurrentFileSystem->Open(fileName, mode);	
 	
 	if (pFile == nullptr)
@@ -183,7 +183,7 @@ bool StorageManager::Initilaize(multiboot_info* info)
 
 bool StorageManager::ConstructFileSystem(multiboot_info* info)
 {
-	//IDE ÇÏµå µð½ºÅ©
+	//IDE ï¿½Ïµï¿½ ï¿½ï¿½Å©
 	FileSysAdaptor* pHDDAdaptor = new HDDAdaptor("HardDisk", 'C');
 
 	pHDDAdaptor->Initialize();
@@ -197,7 +197,7 @@ bool StorageManager::ConstructFileSystem(multiboot_info* info)
 		delete pHDDAdaptor;
 	}
 	
-	//·¥ µð½ºÅ©
+	//ï¿½ï¿½ ï¿½ï¿½Å©
 	FileSysAdaptor* pRamDiskAdaptor = new RamDiskAdaptor("RamDisk", 'K');
 	if (pRamDiskAdaptor->Initialize() == true)
 	{
@@ -210,7 +210,7 @@ bool StorageManager::ConstructFileSystem(multiboot_info* info)
 		delete pRamDiskAdaptor;
 	}
 
-	//¸Þ¸ð¸® ¸®¼Ò½º µð½ºÅ©
+	//ï¿½Þ¸ï¿½ ï¿½ï¿½ï¿½Ò½ï¿½ ï¿½ï¿½Å©
 	FileSysAdaptor* pMemoryResouceAdaptor = new MemoryResourceAdaptor("MemoryResouceDisk", 'L');
 	if (pMemoryResouceAdaptor->Initialize() == true)
 	{
@@ -221,7 +221,7 @@ bool StorageManager::ConstructFileSystem(multiboot_info* info)
 		delete pMemoryResouceAdaptor;
 	}
 	
-	//ÇÃ·ÎÇÇ µð½ºÅ©
+	//ï¿½Ã·ï¿½ï¿½ï¿½ ï¿½ï¿½Å©
 	FileSysAdaptor* pFloppyDiskAdaptor = new FloppyDiskAdaptor("FloppyDisk", 'A');
 	if (pFloppyDiskAdaptor->Initialize() == true)
 	{
