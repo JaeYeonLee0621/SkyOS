@@ -8,7 +8,7 @@
 #define HEAP_MIN_SIZE     0x70000
 
 
-// header structure
+// header structure = 총 9 byte
 typedef struct
 {
     u32int magic;   // Magic number (4byte), used for error checking and identification. (=checksum)
@@ -16,12 +16,14 @@ typedef struct
     u32int size;    // size of the block, including the end footer.
 } header_t;
 
-// footer structure
+// footer structure = 총 8 byte
 typedef struct
 {
     u32int magic;     // Magic number (4byte), same as in header_t.
     header_t *header; // Pointer to the block header.
 } footer_t;
+
+// 즉 heap 에 16byte 공간이 필요하다면 = (9 + 16 + 8) byte 공간이 필요
 
 typedef struct
 {
