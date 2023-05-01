@@ -69,7 +69,7 @@ Thread* ProcessManager::CreateThread(Process* pProcess, FILE* file, LPVOID param
 //#endif	
 	
 
-//파일로부터 읽은 데이터 페이지 수 계산
+// 파일로부터 읽은 데이터 페이지 수 계산
 	int pageRest = 0;
 
 	if ((pThread->m_imageSize % 4096) > 0)

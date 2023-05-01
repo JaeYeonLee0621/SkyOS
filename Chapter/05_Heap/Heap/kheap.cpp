@@ -31,6 +31,7 @@ u32int kmalloc_int(u32int sz, int align, u32int *phys)
 			phys = (u32int*)VirtualMemoryManager::GetPhysicalAddressFromVirtualAddress(VirtualMemoryManager::GetKernelPageDirectory(), (uint32_t)addr);
         }*/
 
+        // heap system 에서 hole 의 address return
         return (u32int)addr;
    
 
@@ -52,6 +53,8 @@ u32int kmalloc_int(u32int sz, int align, u32int *phys)
     }*/
 }
 
+// heap system 에서 회수할려는 memory 를 집어넣는 역할
+// synchronization code가 있는데, 이 작업을 실행하다가 context switching 이 일어나면 안되기 때문에
 void kfree(void *p)
 {
 	kEnterCriticalSection();

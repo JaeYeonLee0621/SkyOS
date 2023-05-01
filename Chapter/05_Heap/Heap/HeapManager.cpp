@@ -17,16 +17,17 @@ namespace HeapManager
 	DWORD GetHeapSize() { return m_heapFrameCount * PAGE_SIZE; }
 
 	DWORD GetUsedHeapSize() { return g_usedHeapSize; }
-
+	
 	bool InitKernelHeap(int heapFrameCount)
 	{
 		PageDirectory* curPageDirectory = GetKernelPageDirectory();
 
-		//ÈüÀÇ °¡»óÁÖ¼Ò
+		// Heap Virtual Address
 		void* pVirtualHeap = (void*)(KERNEL_VIRTUAL_HEAP_ADDRESS);
 
-		//ÇÁ·¹ÀÓ ¼ö¸¸Å­ ¹°¸® ¸Ş¸ğ¸® ÇÒ´çÀ» ¿äÃ»ÇÑ´Ù.
 		m_heapFrameCount = heapFrameCount;
+
+		// Frame ìˆ˜ë§Œí¼ Physical memory allocation ìš”ì²­
 		m_pKernelHeapPhysicalMemory = PhysicalMemoryManager::AllocBlocks(m_heapFrameCount);
 		
 		if (m_pKernelHeapPhysicalMemory == NULL)
@@ -39,13 +40,12 @@ namespace HeapManager
 		}
 
 		
-//ÆäÀÌÁö ½Ã½ºÅÛ¿¡ Èü °¡»óÁÖ¼Ò¿Í ¹°¸®ÁÖ¼Ò¸¦ ¸ÅÇÎÈù´Ù.
 		MapHeapToAddressSpace(curPageDirectory);
 
 #ifdef _HEAP_DEBUG
 		SkyConsole::Print("kernel heap allocation success. frame count : %d\n", m_heapFrameCount);
 #endif
-
+		// heap ì˜ ë§ˆì§€ë§‰ address
 		int virtualEndAddress = (uint32_t)pVirtualHeap + m_heapFrameCount * PMM_BLOCK_SIZE;
 
 #ifdef _HEAP_DEBUG
@@ -56,13 +56,14 @@ namespace HeapManager
 		SkyConsole::Print("Heap Virtual End Address 0x%x\n", virtualEndAddress);
 #endif
 
-		//Èü¿¡ ÇÒ´çµÈ °¡»ó ÁÖ¼Ò ¿µ¿ªÀ» »ç¿ëÇØ¼­ Èü ÀÚ·á±¸Á¶¸¦ »ı¼ºÇÑ´Ù. 
+		// heap ì— í• ë‹¹ëœ virtual address ì˜ì—­ì„ ì‚¬ìš©í•´ì„œ heap data structure ë¥¼ ìƒì„±
 		create_kernel_heap((u32int)pVirtualHeap, (uint32_t)virtualEndAddress, (uint32_t)virtualEndAddress, 0, 0);
 
 		g_heapInit = true;
 		return true;
 	}
-
+	
+	// Paging System ì— Heap Virtual address ì™€ Physical address mapping
 	bool MapHeapToAddressSpace(PageDirectory* curPageDirectory)
 	{
 		

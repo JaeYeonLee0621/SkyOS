@@ -38,10 +38,11 @@ typedef struct
 #ifdef  __cplusplus
 extern "C" {
 #endif
-/**
-   Create a new heap.
-**/
+
+// Kernel heap 생성
 heap_t *create_kernel_heap(u32int start, u32int end, u32int max, u8int supervisor, u8int readonly);
+
+// Process heap 생성
 heap_t *create_heap(u32int start, u32int end, u32int max, u8int supervisor, u8int readonly);
 
 /**
@@ -84,9 +85,7 @@ u32int kmalloc_p(u32int sz, u32int *phys);
 **/
 u32int kmalloc_ap(u32int sz, u32int *phys);
 
-/**
-   General allocation function.
-**/
+// 내부적으로 kmalloc_int 를 호출
 u32int kmalloc(u32int sz);
 u32int malloc(u32int sz);
 u32int calloc(u32int count, u32int size);
