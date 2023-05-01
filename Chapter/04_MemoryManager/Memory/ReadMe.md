@@ -8,11 +8,11 @@
 <br/>
 
 ### 32bit window OS 에서는 4GB Virtual Address Space 이 주어짐
+- 2^32 = 4294967296 = 4GB
 - 이 중 2GB 까지는 응용 프로그램이 사용할 수 있는 주소 공간
 - 나머지 2GB 는 Kernel 의 가상 주소 공간
 
-2GB 로 직접적인 접근을 불가능
-System API 를 호출해서 간접적으로 Kernel Code 수행
++) 2GB 로 직접적인 접근을 불가능 > System API 를 호출해서 간접적으로 Kernel Code 수행
 
 
 <br/>
@@ -31,10 +31,10 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 
 **32bit 에서 보통 Page 의 크기 4KB**
 
-- 32 bit address 에서는 4GB Memory 를 사용할 수 있고
-- 4KB Page 는 4GB 에서 `2^20 개의 Page` 를 가질 수 있음
+- `32 bit address` 에서는 `4GB Memory` 를 사용할 수 있고
+- `4KB Page` 는 `4GB memory` 에서 `2^20 개의 Page` 를 가질 수 있음
 - `2^20 개` 의 Page 를 저장할 수 있는 Table 이 존재해야 함
-- 즉 Page 를 저장하는 공간의 Address 가 20bit 여야함
+- 즉 Page 를 저장하는 공간의 Address 가 `20bit` 여야함
 
 
 <br/>
@@ -56,28 +56,29 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 
 ## 2. Page Directory
 
-- 10bit address = 1024 개
+- `10bit address = 1024 개`
 - Page Table 이 있는 address 를 모아놓은 곳
 - `PDBR (Page Directory Base Register)` 가 Page Directory 에 대한 Base Pointer 유지
-- 한 개의 값들을 Page Directory Entry 라고 부름
+- 한 개의 값들을 **Page Directory Entry** 라고 부름
 
 **Page Directory Entry**
 - 4byte 의 크기를 가짐
-- 여러 가지 Flag 와 Page Table 의 Base Address에 대한 정보를 가지고 있음
+- 여러 가지 Flag 와 `Page Table 의 Base Address에 대한 정보` 를 가지고 있음
 
 <br/>
 
 ## 3. Page Table
 
-- 10bit address = 1024 개 
+- `10bit address = 1024 개`
 - Page 의 Physical Address 가 저장됨
-- 한 개의 값들을 Page Table Entry 라고 부름
+- 한 개의 값들을 **Page Table Entry** 라고 부름
 
 **Page Table Entry**
 - 4byte 의 크기를 가짐
 - 그런데 20bit 만 사용 나머지는 offset 으로 이용
 - 왜냐하면 Page 개수가 `2^20 개 (4GB memory / 4KB page size)`
 - 따라서 `20bit` 의 주소 필요
+- `PTE = Page 가 저장된 address`
 
 <br/>
 
@@ -100,6 +101,6 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 - 이 값은 Process 하나 당 필요로 하는 값이며 Process 가 많아지면 메모리 사용량은 더 증가
 
 +) Process 하나 당 Page Directory 하나 부여
-+) 만약 모든 Page Directory 에 Page Table 을 생성한다면 `2^10 * 4KB = 4MB`
++) 만약 모든 Page Directory 에 Page Table 을 생성한다면 `2^10 (Page Directory address size 10bit) * 4KB = 4MB`
 
 > 일반적으로는 4GB 전 공간에 접근한다고 하더라도 실제 접근할 수 있는 주소는 한정돼 있기 때문에 모든 Page Table 을 생성하지는 않음
