@@ -98,8 +98,6 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 
 - 그런데 4GB 에 접근하기 위해 모든 Page Table 이 메모리에 생성된다면 굉장한 메모리 낭비 (Page Table 의 크기는 4KB = 1024 * 4byte)
 - 만약 모든 Page Directory 에 Page Table 을 생성한다면 `2^10 * 4KB = 4MB`
-
-<br/>
-
 - 이 값은 Process 하나 당 필요로 하는 값이며 Process 가 많아지면 메모리 사용량은 더 증가
-- 일반적으로는 4GB 전 공간에 접근한다고 하더라도 실제 접근할 수 있는 주소는 한정돼 있기 때문에 모든 Page Table 을 생성하지는 않음
+
+> 일반적으로는 4GB 전 공간에 접근한다고 하더라도 실제 접근할 수 있는 주소는 한정돼 있기 때문에 모든 Page Table 을 생성하지는 않음
