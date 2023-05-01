@@ -76,8 +76,8 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 **Page Table Entry**
 - 4byte 의 크기를 가짐
 - 그런데 20bit 만 사용 나머지는 offset 으로 이용
-- 왜냐하면 Page 개수가 2^20 개 (4GB memory / 4KB page size)
-- 따라서 20bit 의 주소 필요
+- 왜냐하면 Page 개수가 `2^20 개 (4GB memory / 4KB page size)`
+- 따라서 `20bit` 의 주소 필요
 
 <br/>
 
@@ -90,14 +90,16 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 
 즉 
 
-- 1024 * 1024 * 4KB = 4GB
-
 > 특정 Process의 Memory 침범으로 인해 다른 Process 가 망가지는 것을 막을 수 있음
 
-<br/>
 
-- 그런데 4GB 에 접근하기 위해 모든 Page Table 이 메모리에 생성된다면 굉장한 메모리 낭비 (Page Table 의 크기는 4KB = 2^10 (address 10bit) * 4byte (안에 있는 값 PTE))
+- 그런데 4GB 에 접근하기 위해 모든 Page Table 이 메모리에 생성된다면 굉장한 메모리 낭비 
+
++) Page Table 의 크기는 4KB = 2^10 (address 10bit) * 4byte (안에 있는 값 PTE))
+
 - 이 값은 Process 하나 당 필요로 하는 값이며 Process 가 많아지면 메모리 사용량은 더 증가
+
++) Process 하나 당 Page Directory 하나 부여
 +) 만약 모든 Page Directory 에 Page Table 을 생성한다면 `2^10 * 4KB = 4MB`
 
 > 일반적으로는 4GB 전 공간에 접근한다고 하더라도 실제 접근할 수 있는 주소는 한정돼 있기 때문에 모든 Page Table 을 생성하지는 않음
