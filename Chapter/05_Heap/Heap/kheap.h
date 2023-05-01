@@ -7,19 +7,19 @@
 #define HEAP_MAGIC        0x123890AB
 #define HEAP_MIN_SIZE     0x70000
 
-/**
-   Size information for a hole/block
-**/
+
+// header structure
 typedef struct
 {
-    u32int magic;   // Magic number, used for error checking and identification.
-    u8int is_hole;   // 1 if this is a hole. 0 if this is a block.
+    u32int magic;   // Magic number (4byte), used for error checking and identification. (=checksum)
+    u8int is_hole;  // 1 if this is a hole. 0 if this is a block.
     u32int size;    // size of the block, including the end footer.
 } header_t;
 
+// footer structure
 typedef struct
 {
-    u32int magic;     // Magic number, same as in header_t.
+    u32int magic;     // Magic number (4byte), same as in header_t.
     header_t *header; // Pointer to the block header.
 } footer_t;
 
