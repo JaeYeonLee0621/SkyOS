@@ -6,11 +6,15 @@
 #include "RamDiskAdaptor.h"
 #include "FloppyDiskAdaptor.h"
 
-//ÀúÀåÀåÄ¡´Â ÃÖ´ë 26°³
 #define STORAGE_DEVICE_MAX 26
 
+
+
+// ë‹¤ì–‘í•œ file system ì— ì ‘ê·¼í•  ë•Œ kernel ì— ì¼ê´€ì„±ì„ ë³´ì¥í•˜ê¸° ìœ„í•´ VFS ì—­í• ì„ ë‹´ë‹¹í•˜ëŠ” ê¸°ëŠ¥ì„ ì¶”ê°€
+// kernel ì— ì¼ê´€ëœ interface ë¥¼ ì •ì˜
 class StorageManager
 {
+
 public:	
 	~StorageManager();
 
@@ -24,7 +28,7 @@ public:
 
 	bool Initilaize(multiboot_info* info);
 
-//ÀÎÅÍÆäÀÌ½º
+// interface
 	bool RegisterFileSystem(FileSysAdaptor* fsys, DWORD deviceID);
 	bool UnregisterFileSystem(FileSysAdaptor* fsys);
 	bool UnregisterFileSystemByID(DWORD deviceID);
@@ -32,7 +36,7 @@ public:
 	bool SetCurrentFileSystemByID(DWORD deviceID);
 	bool SetCurrentFileSystem(FileSysAdaptor* fsys);
 
-//ÆÄÀÏ ¸Ş¼Òµå
+// file method
 	PFILE OpenFile(const char* fname, const char *mode);
 	int ReadFile(PFILE file, unsigned char* Buffer, unsigned int size, int count);
 	int WriteFile(PFILE file, unsigned char* Buffer, unsigned int size, int count);

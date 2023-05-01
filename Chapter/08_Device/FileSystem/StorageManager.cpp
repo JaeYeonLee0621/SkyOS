@@ -7,6 +7,7 @@ FILE* g_stdOut = nullptr;
 FILE* g_stdIn = nullptr;
 FILE* g_stdErr = nullptr;
 
+
 StorageManager::StorageManager()
 {
 	memset(m_fileSystems, 0, sizeof(FileSysAdaptor*) * STORAGE_DEVICE_MAX);
