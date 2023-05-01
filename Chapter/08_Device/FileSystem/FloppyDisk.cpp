@@ -7,11 +7,10 @@ static uint8_t	_CurrentDrive = 0;
 static volatile bool _floppyDiskIRQ = false;
 extern void SendEOI();
 
-//ÇÃ·ÎÇÇ µğ½ºÅ© ÀÎÅÍ·´Æ® ÇÚµé·¯
-//ÇÃ·ÎÇÇ µğ½ºÅ©·ÎºÎÅÍ ÀÎÅÍ·´Æ®°¡ ¹ß»ıÇß´Ù´Â °Í¸¸ Ã¼Å©ÇÑ´Ù.
+
+// FloppyDisk ë¡œë¶€í„° interrupt ê°€ ë°œìƒí–ˆë‹¤ëŠ” ê²ƒë§Œ ì²´í¬
 __declspec(naked) void FloppyDiskHandler() 
 {
-	//·¹Áö½ºÅÍ¸¦ ÀúÀåÇÏ°í ÀÎÅÍ·´Æ®¸¦ ²ö´Ù.
 	_asm
 	{
 		PUSHAD
@@ -23,7 +22,7 @@ __declspec(naked) void FloppyDiskHandler()
 
 	SendEOI();
 
-	// ·¹Áö½ºÅÍ¸¦ º¹¿øÇÏ°í ¿ø·¡ ¼öÇàÇÏ´ø °÷À¸·Î µ¹¾Æ°£´Ù.
+	// Register ë¥¼ ë³µì›í•˜ê³  ë‹¤ì‹œ ëŒì•„ê°
 	_asm
 	{
 		POPFD
@@ -50,7 +49,6 @@ namespace FloppyDisk
 
 		Reset();
 
-		//µå¶óÀÌºê Á¤º¸ ¼³Á¤
 		ConfigureDriveData(13, 1, 0xf, true);
 	}
 
@@ -64,24 +62,30 @@ namespace FloppyDisk
 
 		return _CurrentDrive;
 	}
-	
+
+	// Floppy Disk ë¡œë¶€í„° data ë¥¼ ì½ìŒ	
+	// Sector = 512KB ê°„ë’¤
 	uint8_t* ReadSector(int sectorLBA) {
 
 		if (_CurrentDrive >= 4)
 			return 0;
-		
+
+		// LBA Address ë¥¼ CHS Address ë¡œ ë³€í™˜	
+		// LBA (Logical Block Addressing) : Physical structure ë¥¼ ìƒê°í•˜ì§€ ì•Šê³ , Sector ê°€ ì¼ë ¬ë¡œ ì—°ê²°ë¼ ìˆë‹¤ê³  ê°€ì •
+		// CHS (Cylinder, Header, Sector) : Physical Datablock ì— address ë¥¼ ì œê³µí•˜ëŠ” ì´ˆê¸° ë°©ì‹
 		int head = 0, track = 0, sector = 1;
 		ConvertLBAToCHS(sectorLBA, head, track, sector);
 
-		//¸ğÅÍ¸¦ ÄÑ°í Æ®·¢À» Ã£´Â´Ù.
+		// Motor ë¥¼ ì¼œê³  Track ì„ ì°¾ìŒ
 		ControlMotor(true);
 		if (Seek((uint8_t)track, (uint8_t)head) != 0)
 			return 0;
 
-		// ¼½ÅÍ¸¦ ÀĞÀºÈÄ ¸ğÅÍ¸¦ ²ö´Ù.
+		// Sector ë¥¼ ì½ì€ í›„ Motor ë¥¼ ë”
 		ReadSectorImpl((uint8_t)head, (uint8_t)track, (uint8_t)sector);
 		ControlMotor(false);
 
+		// DMA Buffer ì— ì €ì¥
 		return (uint8_t*)DMA_BUFFER;
 	}
 
@@ -89,12 +93,10 @@ namespace FloppyDisk
 
 		uint32_t st0, cyl;
 
-//FDC ¸®¼Â
 		DisableController();
 		EnableController();
 		WaitIrq();
 
-		// ¸ğµç µå¶óÀÌºê¿¡ CHECK_INT/SENSE ÀÎÅÍ·´Æ® Ä¿¸Çµå¸¦ Àü¼ÛÇÑ´Ù.
 		for (int i = 0; i<4; i++)
 			CheckInterrput(st0, cyl);
 		
@@ -114,7 +116,6 @@ namespace FloppyDisk
 		cyl = ReadData();
 	}
 
-	//ÇÃ·ÎÇÇ µå¶óÀÌºêÀÇ ¸ğÅÍ¸¦ ÄÑ°Å³ª ²ö´Ù
 	void ControlMotor(bool b) 
 	{
 		if (_CurrentDrive > 3)
@@ -138,13 +139,11 @@ namespace FloppyDisk
 			break;
 		}
 
-		//µå¶óÀÌºêÀÇ ¸ğÅÍ¸¦ ÄÑ°Å³ª ²ö´Ù.
 		if (b)
 			WriteDOR(uint8_t(_CurrentDrive | motor | FLPYDSK_DOR_MASK_RESET | FLPYDSK_DOR_MASK_DMA));
 		else
 			WriteDOR(FLPYDSK_DOR_MASK_RESET);
 
-		//¸ğÅÍ°¡ ²¨Áö°Å³ª È°¼ºÈ­µÉ¶§±îÁö ¾à°£ÀÇ ½Ã°£À» ´ë±âÇÑ´Ù.
 		//msleep(20);
 	}
 	
@@ -167,7 +166,6 @@ namespace FloppyDisk
 		if (drive >= 4)
 			return -2;
 
-		//¸ğÅÍ¸¦ ÄÒ´Ù.
 		ControlMotor(true);
 
 		for (int i = 0; i < 10; i++)
@@ -177,7 +175,6 @@ namespace FloppyDisk
 			WaitIrq();
 			CheckInterrput(st0, cyl);
 
-			//½Ç¸°´õ 0À» Ã£¾ÒÀ¸¸é ¸ğÅÍ¸¦ ²ô°í Á¾·áÇÑ´Ù.
 			if (!cyl) {
 
 				ControlMotor(false);
@@ -250,7 +247,6 @@ namespace FloppyDisk
 		CheckInterrput(st0, cyl);
 	}
 
-	//ÁÖ¾îÁø ½Ç¸°´õ¿Í Çìµå°¡ Á¸ÀçÇÏ´ÂÁö ±× °á°ú¸¦ ¸®ÅÏÇÑ´Ù
 	int Seek(uint8_t cyl, uint8_t head) 
 	{
 
@@ -275,7 +271,6 @@ namespace FloppyDisk
 		return -1;
 	}
 
-	//(FDC)ÇÃ·ÎÇÇ µğ½ºÅ© ÄÁÆ®·Ñ·¯ÀÇ »óÅÂ¸¦ ÀĞ´Â´Ù
 	uint8_t ReadStatus() 
 	{
 		return InPortByte(FLPYDSK_MSR);

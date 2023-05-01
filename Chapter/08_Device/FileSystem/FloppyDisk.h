@@ -10,11 +10,8 @@ namespace FloppyDisk
 	void SetWorkingDrive(uint8_t drive);
 	uint8_t GetWorkingDrive();
 
-//ºΩ≈Õ∏¶ ¿–æÓµÈ¿Œ¥Ÿ
 	uint8_t* ReadSector(int sectorLBA);
 
-/////////////////////////////////////////////////////////////////////////
-//LBA ¡÷º“∏¶ to CHS(Cylinder : Header : Sector) «¸≈¬∑Œ ∫Ø»Ø«—¥Ÿ
 	void ConvertLBAToCHS(int lba, int& head, int& track, int& sector);
 
 	void ControlMotor(bool b);
@@ -29,6 +26,8 @@ namespace FloppyDisk
 	void WriteDOR(uint8_t val);
 	void WriteCCR(uint8_t val);
 	int Seek(uint8_t cyl, uint8_t head);
+
+	// Driver information ÏÑ§Ï†ï
 	void ConfigureDriveData(uint8_t stepr, uint8_t loadt, uint8_t unloadt, bool dma);
 	int CalibrateDisk(uint8_t drive);
 };

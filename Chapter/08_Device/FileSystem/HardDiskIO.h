@@ -105,7 +105,7 @@ static const BYTE IDE_COM_WRITE_SECTORS = 0x31;
 static const BYTE IDE_COM_WRITE_VERIFY = 0x3C;
 
 
-//¿¡·¯ °ü·Ã »ó¼ö
+//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 enum HDD_Errors
 {
 	HDD_NO_ERROR,
@@ -123,28 +123,29 @@ enum HDD_Errors
 };
 
 
+// HD ì˜ ì •ë³´ê°€ ë‹´ê¹€
 typedef struct tag_HDDInfo
 {
-	BYTE IORegisterIdx;  // IO ¸®¼Ò½º¿Í IRQ ÀÎµ¦½º ¹øÈ£
+	BYTE IORegisterIdx;  // IO Resource ì™€ IRQ index number
 	BYTE IRQ;
 
-	BYTE DeviceNumber;		// 0: ¸¶½ºÅÍ, 1:½½·¹ÀÌºê 
+	BYTE DeviceNumber;		// 0: master, 1: slave 
 	char SerialNumber[21];
 	char FirmwareRevision[21];
 	char ModelNumber[21];
 	BYTE DMASupported;
 	BYTE LBASupported;
 
-	BYTE DeviceID[512];		// µğ¹ÙÀÌ½º ½Äº° Ä¿¸Çµå·ÎºÎÅÍ ¾òÀº µğ¹ÙÀÌ½º ID
+	BYTE DeviceID[512];		// device identification comamnd ë¡œ ë¶€í„° ì–»ì€ device id
 
-	BYTE Mode;			// 0 - CHS ¸ğµå, 1-LBA ¸ğµå
+	BYTE Mode;			// 0 - CHS mode, 1-LBA mode
 
 	UINT16 CHSHeadCount;
 	UINT16 CHSCylinderCount;
 	UINT16 CHSSectorCount;
-	UINT32 LBACount;   		//LBA ¸ğµå¿¡¼­¸¸ »ç¿ë
+	UINT32 LBACount; // LBA mode ì—ì„œë§Œ ì‚¬ìš© 
 
-	UINT16 BytesPerSector;
+	UINT16 BytesPerSector; // Sector ë‹¹ byte ìˆ˜
 
 	BYTE LastError;
 }HDDInfo;
@@ -159,7 +160,7 @@ typedef struct tag_VFS_IO_PARAMETER
 
 	UINT16 SectorCount;
 
-	BYTE   Mode;		//0ÀÌ¸é LBA ¸ğµå
+	BYTE   Mode;		//0ï¿½Ì¸ï¿½ LBA ï¿½ï¿½ï¿½
 
 	UINT16 Others[20];
 }VFS_IO_PARAMETER;

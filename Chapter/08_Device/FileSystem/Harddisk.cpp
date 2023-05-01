@@ -4,7 +4,6 @@ extern void SendEOI();
 
 __declspec(naked) void _HDDInterruptHandler() {
 
-	//·¹Áö½ºÅÍ¸¦ ÀúÀåÇÏ°í ÀÎÅÍ·´Æ®¸¦ ²ö´Ù.
 	_asm
 	{
 		PUSHAD
@@ -14,7 +13,6 @@ __declspec(naked) void _HDDInterruptHandler() {
 
 	SendEOI();
 
-	// ·¹Áö½ºÅÍ¸¦ º¹¿øÇÏ°í ¿ø·¡ ¼öÇàÇÏ´ø °÷À¸·Î µ¹¾Æ°£´Ù.
 	_asm
 	{
 		POPFD
@@ -23,7 +21,6 @@ __declspec(naked) void _HDDInterruptHandler() {
 	}
 }
 
-//¹ß°ßµÈ ÇÏµåµğ½ºÅ© °³¼ö¸¦ ¸®ÅÏÇÑ´Ù.
 BYTE HardDiskHandler::GetTotalDevices()
 {
 	return (BYTE)HDDs.Count();
@@ -50,7 +47,6 @@ char * HardDiskHandler::GetLastError(BYTE errorCode)
 	}
 }
 
-//µğ¹ÙÀÌ½º¿¡ ¿¡·¯°¡ ¹ß»ıÇßÀ» °æ¿ì ¿¡·¯ ·¹Áö½ºÅÍÀÇ °ªÀ» ÀĞ¾îµéÀÎ´Ù.
 BYTE ReadErrorRegister(BYTE deviceController)
 {
 	BYTE Status = InPortByte(IDE_Con_IOBases[deviceController][0] + IDE_CB_STATUS);
@@ -63,9 +59,7 @@ BYTE ReadErrorRegister(BYTE deviceController)
 		return 0;
 }
 
-//µğ¹ÙÀÌ½º°¡ µ¥ÀÌÅÍ¸¦ Àü¼ÛÇÏ°Å³ª ¹ŞÀ» ¼ö ÀÖ´Â ÁØºñ°¡ µÇ¾ú´ÂÁö È®ÀÎÇÑ´Ù.
-//deviceController : Å×½ºÆ®ÇÒ µğ¹ÙÀÌ½º ÄÁÆ®·Ñ·¯ÀÇ ÀÎµ¦½º ¹øÈ£
-//µğ¹ÙÀÌ½º°¡ µ¥ÀÌÅÍ°ü·Ã Ã³¸®¸¦ ÇÒ ¼ö ÀÖ´Â ÁØºñ°¡ µÇ¾úÀ¸¸é TRUE¸¦ ±×·¸Áö ¾ÊÀ¸¸é FALSE¸¦ ¸®ÅÏÇÑ´Ù.
+
 BOOLEAN IsDeviceDataReady(int deviceController, DWORD waitUpToms = 0, BOOLEAN checkDataRequest = TRUE)
 {
 	UINT32 Time1, Time2;
@@ -95,7 +89,6 @@ BOOLEAN IsDeviceDataReady(int deviceController, DWORD waitUpToms = 0, BOOLEAN ch
 	return FALSE;
 }
 
-//ÁÖ¾îÁø µğ¹ÙÀÌ½º ÄÁÆ®·Ñ·¯¸¦ »ç¿ëÇÒ ¼ö ÀÖ´ÂÁö ¾ø´ÂÁö¸¦ Ã¼Å©ÇÑ´Ù.
 BOOLEAN IsDeviceControllerBusy(int DeviceController, int WaitUpToms = 0)
 {
 	UINT32 Time1, Time2;
@@ -112,12 +105,11 @@ BOOLEAN IsDeviceControllerBusy(int DeviceController, int WaitUpToms = 0)
 	return TRUE;
 }
 
-//ºÎÂøµÈ µğ¹ÙÀÌ½º¸¦ ¼ÒÇÁÆ®¿ş¾î ¸®¼ÂÇÑ´Ù.
 BYTE HardDiskHandler::DoSoftwareReset(UINT16 DeviceController)
 {
-	BYTE DeviceControl = 4; //SRST bit Á¦¾î ·¹Áö½ºÅÍÀÇ SRST ºñÆ® ÇÊµå¿¡ °ªÀ» ¼³Á¤
+	BYTE DeviceControl = 4; 
 	OutPortByte(IDE_Con_IOBases[DeviceController][0] + IDE_CON_DEVICE_CONTROL, DeviceControl);
-	DeviceControl = 0;      //Á¦¾î ·¹Áö½ºÅÍÀÇ SRST ºñÆ®°ª Å¬¸®¾î
+	DeviceControl = 0;      
 	OutPortByte(IDE_Con_IOBases[DeviceController][0] + IDE_CON_DEVICE_CONTROL, DeviceControl);
 
 	return InPortByte(IDE_Con_IOBases[DeviceController][0] + IDE_CB_ERROR);
@@ -136,72 +128,92 @@ HardDiskHandler::HardDiskHandler()
 
 }
 
+
 /*
-ÃÊ±âÈ­ ¸Ş¼Òµå : ¸ğµç µğ¹ÙÀÌ½º ÄÁÆ®·Ñ·¯¸¦ È®ÀÎÇØ¼­ ÀÌ¿ëÇÒ ¼ö ÀÖ´ÂÁö Ã¼Å©ÇÑ´Ù.
-1) µğ¹ÙÀÌ½º ÄÁÆ®·Ñ·¯ÀÇ Busy ºñÆ®¸¦ È®ÀÎÇÑ´Ù. ÀÌ °ªÀÌ ¼³Á¤µÇ¸é ÇØ´ç µğ¹ÙÀÌ½º ÄÁÆ®·Ñ·¯´Â »ç¿ëÇÒ ¼ö ¾ø´Ù.
-2) µğ¹ÙÀÌ½º¸¦ Áø´ÜÇÏ´Â Ä¿¸Çµå¸¦ º¸³½´Ù.
-3) Æ¯Á¤½Ã°£ ´ë±âµ¿¾È Busy ºñÆ®°¡ Å¬¸®¾îµÇ¸é µğ¹ÙÀÌ½º ÄÁÆ®·Ñ·¯¿¡ Á¢±ÙÇÒ ¼ö ÀÖ´Ù.
-4) ¿¡·¯ ·¹Áö½ºÅÍ¸¦ ÀĞ´Â´Ù.
-	a) ºñÆ®°ªÀÌ 0ÀÌ¸é ¸¶½ºÅÍ µğ½ºÅ©°¡ ¼³Ä¡µÈ °ÍÀ» ÀÇ¹Ì
-	b) ºñÆ®°ªÀÌ 7ÀÌ¸é ½½·¹ÀÌºê µğ½ºÅ© ¼³Ä¡µÇÁö ¾ÊÀ½
-5) DEV_HEAD ·¹Áö½ºÅÍ¿¡ Àû´çÇÑ ºñÆ®°ªÀ» ¼³Á¤ÇÑ´Ù.
-6) 50ns Á¤µµ ´ë±âÇÑ´Ù.
-7) µğ¹ÙÀÌ½º Ä¿¸Çµå¸¦ º¸³½´Ù.
-8) µğ¹ÙÀÌ½º·ÎºÎÅÍ 512¹ÙÀÌÆ® Á¤º¸°ªÀ» ¹Ş´Â´Ù.
+
+ëª¨ë“  Device Controller ë¥¼ í™•ì¸í•´ì„œ ì´ìš©í•  ìˆ˜ ìˆëŠ”ì§€ ì²´í¬
+
+1. loop ë¥¼ ëŒë©´ì„œ ê° Device controllerì˜ busy bit í™•ì¸
+ì´ value ê°€ ì„¤ì •ë¼ ìˆìœ¼ë©´, í•´ë‹¹ device controller ëŠ” ì‚¬ìš©í•  ìˆ˜ ì—†ìŒ
+
+2. device ë¥¼ ì§„ë‹¨í•˜ëŠ” command ë¥¼ ë³´ëƒ„
+
+3. íŠ¹ì • ì‹œê°„ ëŒ€ê¸° ë™ì•ˆ Busy bit ê°€ clear ë˜ë©´ Device Controller ì— ì ‘ê·¼ ê°€ëŠ¥
+
+4. ì§„ë‹¨ command ê²°ê³¼ë¥¼ Error register ë¡œë¶€í„° ì½ìŒ
+	a) 0 ë²ˆì§¸ bit ê°’ : master disk ê°€ ì„¤ì¹˜
+	b) 7 ë²ˆì§¸ bit ê°’ : slave disk ê°€ ì„¤ì¹˜
+
+5. device head register ì— ì ë‹¹í•œ bit ê°’ ì„¤ì •
+
+6. device command ë¥¼ ë³´ëƒ„
+
+7. device ë¡œ ë¶€í„° 512 byte ì •ë³´ë¥¼ ì½ìŒ
+
 */
+
 void HardDiskHandler::Initialize()
 {
-	char strKey[3] = "H0"; //ÇÏµåµğ½ºÅ© ID
+	char strKey[3] = "H0"; 
 	
-	//¾Æ¹«·± ¿ªÇÒÀ» ÇÏÁö ¾Ê´Â ÇÏµåµğ½ºÅ© ÇÚµé·¯ÀÌÁö¸¸ Á¤ÀÇ¸¦ ÇØ¾ß ÇÑ´Ù.
+	// ì•„ë¬´ëŸ° ì—­í• ì„ í•˜ì§€ ì•ŠëŠ” HD Interrupt handler ì§€ë§Œ ì •ì˜ë¥¼ í•´ì•¼í•¨
+	// CPU ì—ê²Œ ì œì–´ê¶Œì„ ëŒë¦¼
+	// ë“±ë¡í•´ë‘ì§€ ì•Šìœ¼ë©´, OS ê°€ ë¹„ì •ìƒì ìœ¼ë¡œ ë™ì‘
 	setvect(32 + 14, _HDDInterruptHandler);
 	setvect(32 + 15, _HDDInterruptHandler);
 
-	//Collection ±¸Á¶Ã¼ ¹ß°ßÇÑ ÇÏµåµğ½ºÅ© Á¤º¸ ¸®½ºÆ®¸¦ °ü¸®ÇÑ´Ù.
+	// Collection structure : ê²€ìƒ‰ëœ HD ë¥¼ list í˜•íƒœë¡œ ê´€ë¦¬
 	HDDs.Initialize();	
 
-	//µğ¹ÙÀÌ½º ÄÁÆ®·Ñ·¯¸¦ ÅëÇØ ÇÏµåµğ½ºÅ©¸¦ Ã£´Â´Ù.
+	// Device Controller ë¥¼ í†µí•´ HD ë¥¼ ì°¾ìŒ
 	for (int DeviceController = 0; DeviceController < IDE_CONTROLLER_NUM; DeviceController++)
 	{
-		DoSoftwareReset(DeviceController); //¼ÒÇÁÆ®¿ş¾î ¸®¼Â
-		if (IsDeviceControllerBusy(DeviceController, 1000)) //µğ¹ÙÀÌ½º ÄÁÆ®·Ñ·¯¸¦ »ç¿ëÇÒ ¼ö ¾øÀ¸¸é ÆĞ½ºÇÑ´Ù.
+		DoSoftwareReset(DeviceController); 
+
+		// Device Controller ë¥¼ ì‚¬ìš©í•  ìˆ˜ ì—†ìœ¼ë©´ íŒ¨ìŠ¤
+		if (IsDeviceControllerBusy(DeviceController, 1000)) 
 			continue;
 		
-		//µğ¹ÙÀÌ½º Áø´Ü ¿äÃ»À» ÇÑ´Ù.
+		// Device ì§„ë‹¨ ìš”ì²­
 		OutPortByte(IDE_Con_IOBases[DeviceController][0] + IDE_CB_COMMAND, IDE_COM_EXECUTE_DEVICE_DIAGNOSTIC);
-				
+
+		// Error Register ë¡œë¶€í„° ê²°ê³¼ë¥¼ ì–»ìŒ
 		BYTE result = InPortByte(IDE_Con_IOBases[DeviceController][0] + IDE_CB_ERROR);
-		for (BYTE device = 0; device < 1; device++)         //¸¶½ºÅÍ¿Í ½½·¹ÀÌºê µğ½ºÅ©¿¡ ´ëÇØ ·çÇÁ¸¦ µ·´Ù.
+
+		// Master, Slace Disk ì— ëŒ€í•´ loop ë¥¼ ë”
+		for (BYTE device = 0; device < 1; device++)     
 		{
 			UINT16 DeviceID_Data[512], j;
 			
 			//if (device == 0 && !(result & 1))
 				//continue;
-
-			if (device == 1 && (result & 0x80))
+			
+			if (device == 1 && (result & 0x80)) 
 				continue;
 
-			//µğ¹ÙÀÌ½º IO°¡ °¡´ÉÇÏ´Ù¸é
-			if (device == 1)
+			// Device IO ê°€ ê°€ëŠ¥í•˜ë‹¤ë©´
+			if (device == 1) // Slave ì¸ê°€
 				OutPortByte(IDE_Con_IOBases[DeviceController][0] + IDE_CB_DEVICE_HEAD, 0x10); //Setting 4th bit(count 5) to set device as 1
 			else
 				OutPortByte(IDE_Con_IOBases[DeviceController][0] + IDE_CB_DEVICE_HEAD, 0x0);
 
 			//msleep(50);
 
-			//µğ¹ÙÀÌ½º Á¤º¸ ¿äÃ»
+			// Device information ìš”ì²­
 			OutPortByte(IDE_Con_IOBases[DeviceController][0] + IDE_CB_COMMAND, IDE_COM_IDENTIFY_DEVICE);
-			if (!IsDeviceDataReady(DeviceController, 600, TRUE)) //µğ¹ÙÀÌ½º Á¤º¸°¡ Ã¤¿öÁú¶§±îÁö ´ë±âÇÑ´Ù.
+
+			// Device information ì´ ì±„ì›Œì§ˆ ë•Œê¹Œì§€ ëŒ€ê¸°
+			if (!IsDeviceDataReady(DeviceController, 600, TRUE)) 
 			{
 				SkyConsole::Print("Data not ready %d\n", DeviceController);
 				continue;
 			}
 
-			//µğ¹ÙÀÌ½º·Î ºÎÅÍ 512¹ÙÀÌÆ® Á¤º¸¸¦ ÀĞ¾îµéÀÎ´Ù.
+			// Device ë¡œë¶€í„° 512 byte ì •ë³´ë¥¼ ì½ì–´ë“¤ì„
 			for (j = 0; j < 256; j++)
 				DeviceID_Data[j] = InPortWord(IDE_Con_IOBases[DeviceController][0] + IDE_CB_DATA);
 			
-			//HDD ³ëµå »ı¼º
+			// HDD node ìƒì„±
 			HDDInfo * newHDD = (HDDInfo *)kmalloc(sizeof(HDDInfo));
 			if (newHDD == NULL)
 			{
@@ -209,7 +221,7 @@ void HardDiskHandler::Initialize()
 				return;
 			}
 
-			//HDD ³ëµå¿¡ µğ¹ÙÀÌ½º Á¤º¸¸¦ ±â·ÏÇÑ´Ù.
+			// HDD node ì— Device ì •ë³´ ê¸°ë¡
 			newHDD->IORegisterIdx = DeviceController;
 			memcpy(newHDD->DeviceID, DeviceID_Data, 512);
 			newHDD->DeviceNumber = device;
@@ -253,10 +265,12 @@ void HardDiskHandler::Initialize()
 			LBASectors = LBASectors << 16;
 			LBASectors |= DeviceID_Data[60];			
 			newHDD->LBACount = LBASectors;
+
+			// Structure ì— ì •ë³´ë¥¼ ì±„ìš´ í›„ HD ëª©ë¡ì— ì¶”ê°€
 			HDDs.Add(newHDD, strKey);
 
 			SkyConsole::Print("DeviceId : %x, %s\n", device, newHDD->ModelNumber);
-			strKey[1]++; //»õ ÇÏµåµğ½ºÅ© ³ëµå¸¦ À§ÇØ ÇÏµåµğ½ºÅ© ID¸¦ º¯°æÇÑ´Ù.
+			strKey[1]++; // ìƒˆ HD node ë¥¼ ìœ„í•´ HD ID ë³€ê²½
 		}
 	}
 }
@@ -278,22 +292,27 @@ HDDInfo * HardDiskHandler::GetHDDInfo(BYTE * DPF)
 	memcpy(retHDD, getHDD, sizeof(HDDInfo));
 	return retHDD;
 }
-/* ¼½ÅÍ·ÎºÎÅÍ µ¥ÀÌÅÍ¸¦ ÀĞ¾îµéÀÎ´Ù(CHS ¸ğµå)
-1) HDDInfo °´Ã¼°ªÀ» ¾ò´Â´Ù.
-2) µğ¹ÙÀÌ½º¸¦ »ç¿ëÇÒ ¼ö ÀÖ´ÂÁö È®ÀÎÇÑ´Ù.
-3) µğ¹ÙÀÌ½º ºñÆ®¸¦ ¼³Á¤ÇÑ´Ù.
-4) µğ¹ÙÀÌ½º°¡ µ¥ÀÌÅÍ Ä¿¸Çµå¸¦ ¹Ş¾ÆµéÀÏ ÁØºñ°¡ µÇ¾ú´ÂÁö È®ÀÎÇÑ´Ù.
-5) Çìµå¿Í Æ®·¢, ±âÅ¸°ªµéÀ» ¼³Á¤ÇÑ´Ù.
-6) ÀĞ±â Ä¿¸Çµå¸¦ º¸³½´Ù.
-7) µğ¹ÙÀÌ½º°¡ µ¥ÀÌÅÍ Àü¼ÛÀ» ÇÒ ¼ö ÀÖ´Â ÁØºñ°¡ µÇ¾ú´ÂÁö È®ÀÎÇÑ´Ù.
-8) µ¥ÀÌÅÍ¸¦ ÀĞ±â À§ÇØ µ¥ÀÌÅÍ ·¹Áö½ºÅÍ¸¦ ÀĞ´Â´Ù.
+
+/*
+
+1. HDDInfo ê°ì²´ë¥¼ ì½ìŒ
+2. Device ë¥¼ ì‚¬ìš©í•  ìˆ˜ ìˆëŠ”ì§€ í™•ì¸
+3. Device bit ì„¤ì •
+4. Device ê°€ Data command ë¥¼ ë°›ì•„ë“¤ì¼ ì¤€ë¹„ê°€ ëëŠ”ì§€ í™•ì¸
+5. Head, Track, ê¸°íƒ€ ê°’ë“¤ì„ ì„¤ì •
+6. Read command ë¥¼ ë³´ëƒ„
+7. Device ê°€ Data transferë¥¼ í•  ìˆ˜ ìˆëŠ” ì¤€ë¹„ê°€ ëëŠ”ì§€ í™•ì¸
+8. Data Registerì— ì ‘ê·¼í•´ì„œ Data ì½ìŒ
+9. Data Registerë¡œ ë¶€í„° ì½ì€ Dataë¥¼ buffer ì— ê¸°ë¡
+
 */
+
 BYTE HardDiskHandler::ReadSectors(BYTE * DPF, UINT16 StartCylinder, BYTE StartHead, BYTE StartSector, BYTE NoOfSectors, BYTE * buffer, BOOLEAN WithRetry)
 {
 	HDDInfo * pHDDInfo;
 	BYTE DevHead, StartCylHigh = 0, StartCylLow = 0;
 
-	//ÇÏµåµğ½ºÅ© ¾ÆÀÌµğ·Î ºÎÅÍ ÇÏµåµğ½ºÅ©Á¤º¸¸¦ ¾ò¾î³½´Ù.
+	// HD id ë¡œë¶€í„° HD ì •ë³´ë¥¼ ì–»ìŒ
 	pHDDInfo = HDDs.Item((char *)DPF);
 	if (pHDDInfo == NULL)
 	{
@@ -306,14 +325,14 @@ BYTE HardDiskHandler::ReadSectors(BYTE * DPF, UINT16 StartCylinder, BYTE StartHe
 	else
 		DevHead = StartHead | 0xB0;
 
-	//µğ¹ÙÀÌ½º°¡ ÁØºñµÉ¶§ ±îÁö ´ë±âÇÑ´Ù.
+	// Device ê°€ ì¤€ë¹„ë  ë•Œê¹Œì§€ ëŒ€ê¸°
 	if (IsDeviceControllerBusy(pHDDInfo->IORegisterIdx, 1 * 60))
 	{
 		m_lastError = HDD_CONTROLLER_BUSY;
 		return HDD_CONTROLLER_BUSY;
 	}
 
-	//µğ¹ÙÀÌ½º°¡ µ¥ÀÌÅÍ Ä¿¸Çµå¸¦ ¹Ş¾ÆµéÀÏ ÁØºñ°¡ µÇ¾ú´ÂÁö È®ÀÎÇÑ´Ù.
+	// Device ê°€ Data command ë¥¼ ë°›ì•„ë“¤ì¼ ì¤€ë¹„ê°€ ëëŠ” ì§€ í™•ì¸
 	OutPortByte(IDE_Con_IOBases[pHDDInfo->IORegisterIdx][0] + IDE_CB_DEVICE_HEAD, DevHead);
 
 	if (!IsDeviceDataReady(pHDDInfo->IORegisterIdx, 1 * 60, FALSE))
@@ -325,7 +344,7 @@ BYTE HardDiskHandler::ReadSectors(BYTE * DPF, UINT16 StartCylinder, BYTE StartHe
 	StartCylHigh = StartCylinder >> 8;
 	StartCylLow = (StartCylinder << 8) >> 8;
 
-	//ÀĞ¾îµéÀÏ µ¥ÀÌÅÍÀÇ À§Ä¡¸¦ ÁöÁ¤ÇÑ´Ù. ½Ç¸°´õ À§Ä¡, ¼½ÅÍ ½ÃÀÛÀ§Ä¡, ÀĞ¾îµéÀÏ ¼½ÅÍÀÇ ¼ö
+	// ì½ì–´ë“¤ì¼ ìœ„ì¹˜ ì§€ì •
 	OutPortByte(IDE_Con_IOBases[pHDDInfo->IORegisterIdx][0] + IDE_CB_CYLINDER_HIGH, StartCylHigh);
 	OutPortByte(IDE_Con_IOBases[pHDDInfo->IORegisterIdx][0] + IDE_CB_CYLINDER_LOW, StartCylLow);
 	OutPortByte(IDE_Con_IOBases[pHDDInfo->IORegisterIdx][0] + IDE_CB_SECTOR, StartSector);
@@ -333,28 +352,28 @@ BYTE HardDiskHandler::ReadSectors(BYTE * DPF, UINT16 StartCylinder, BYTE StartHe
 
 	OutPortByte(IDE_Con_IOBases[pHDDInfo->IORegisterIdx][0] + IDE_CB_COMMAND, WithRetry ? IDE_COM_READ_SECTORS_W_RETRY : IDE_COM_READ_SECTORS);
 
-	//¿äÃ»ÇÑ ¼½ÅÍ¼ö¸¸Å­ µ¥ÀÌÅÍ¸¦ ÀĞ¾îµéÀÎ´Ù.
+	// ìš”ì²­í•œ sector ìˆ˜ë§Œí¼ data ë¥¼ ì½ìŒ
 	for (BYTE j = 0; j < NoOfSectors; j++)
 	{
-		//µğ¹ÙÀÌ½º¿¡ µ¥ÀÌÅÍ°¡ ÁØºñµÇ¾ú´Â°¡?
+		// device ì— data ê°€ ì¤€ë¹„ëëŠ”ê°€?
 		if (!IsDeviceDataReady(pHDDInfo->IORegisterIdx, 1 * 60, TRUE))
 		{
 			m_lastError = HDD_DATA_NOT_READY;
 			return HDD_DATA_NOT_READY;
 		}
 
-		// ÀÌ ·çÇÁÆ² ÅëÇØ ¼½ÅÍ Å©±âÀÎ 512¹ÙÀÌÆ®¸¦ ¹öÆÛ¿¡ ±â·ÏÇÒ ¼ö ÀÖ´Ù.
+		// ì´ loop ë¥¼ í†µí•´ sector size ì¸ 512 byte ë¥¼ buffer ì— ê¸°ë¡
 		for (UINT16 i = 0; i < (pHDDInfo->BytesPerSector) / 2; i++)
 		{
 			UINT16 w = 0;
 			BYTE l, h;
 
-			//2¹ÙÀÌÆ®¸¦ ÀĞ´Â´Ù.
+			// 2byte ë¥¼ ì½ìŒ
 			w = InPortWord(IDE_Con_IOBases[pHDDInfo->IORegisterIdx][0] + IDE_CB_DATA);
 			l = (w << 8) >> 8;
 			h = w >> 8;
 			
-			//2¹ÙÀÌÆ®¸¦ ¾´´Ù.
+			// 2byte ë¥¼ ì”€
 			buffer[(j * (pHDDInfo->BytesPerSector)) + (i * 2)] = l;
 			buffer[(j * (pHDDInfo->BytesPerSector)) + (i * 2) + 1] = h;
 		}
@@ -362,8 +381,8 @@ BYTE HardDiskHandler::ReadSectors(BYTE * DPF, UINT16 StartCylinder, BYTE StartHe
 	return HDD_NO_ERROR;
 }
 
-// ¼½ÅÍ·ÎºÎÅÍ µ¥ÀÌÅÍ¸¦ ÀĞ¾îµéÀÎ´Ù(LBA ¸ğµå)
-// ÀĞ¾îµéÀÌ´Â ·çÆ¾Àº CHS ¸ğµå¿Í µ¿ÀÏÇÏ´Ù.
+// ï¿½ï¿½ï¿½Í·Îºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½Ğ¾ï¿½ï¿½ï¿½Î´ï¿½(LBA ï¿½ï¿½ï¿½)
+// ï¿½Ğ¾ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½Æ¾ï¿½ï¿½ CHS ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
 BYTE HardDiskHandler::ReadSectors(BYTE * DPF, UINT32 StartLBASector, BYTE NoOfSectors, BYTE * Buffer, BOOLEAN WithRetry)
 {
 	HDDInfo * HDD;
@@ -428,15 +447,15 @@ BYTE HardDiskHandler::ReadSectors(BYTE * DPF, UINT32 StartLBASector, BYTE NoOfSe
 }
 
 
-/*¼½ÅÍ¿¡ µ¥ÀÌÅÍ¸¦ ¾´´Ù.
-1) HDDInfo °´Ã¼¸¦ ¾ò¾î³½´Ù.
-2) µğ¹ÙÀÌ½º¸¦ »ç¿ëÇÒ ¼ö ÀÖ´ÂÁö Ã¼Å©ÇÑ´Ù.
-3) µğ¹ÙÀÌ½º ºñÆ®¸¦ ¼³Á¤ÇÑ´Ù.
-4) µğ¹ÙÀÌ½º°¡ µ¥ÀÌÅÍ Ä¿¸Çµå¸¦ ¹Ş¾ÆµéÀÏ ¼ö ÀÖ´ÂÁö Ã¼Å©ÇÑ´Ù.
-5) Çìµå, Æ®·¢, ±âÅ¸ Á¤º¸¸¦ ¼³Á¤ÇÑ´Ù.
-6) ¾²±â Ä¿¸Çµå¸¦ Àü¼ÛÇÑ´Ù.
-7) µğ¹ÙÀÌ½º°¡ µ¥ÀÌÅÍ¸¦ ÀĞÀ» ÁØºñ°¡ µÇ¾ú´ÂÁö Ã¼Å©ÇÑ´Ù.
-8) µ¥ÀÌÅÍ¸¦ Àü¼ÛÇÏ±â À§ÇØ µ¥ÀÌÅÍ ·¹Áö½ºÅÍ¿¡ µ¥ÀÌÅÍ¸¦ ±â·ÏÇÑ´Ù.
+/*ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½.
+1) HDDInfo ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½î³½ï¿½ï¿½.
+2) ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ Ã¼Å©ï¿½Ñ´ï¿½.
+3) ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+4) ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä¿ï¿½Çµå¸¦ ï¿½Ş¾Æµï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ Ã¼Å©ï¿½Ñ´ï¿½.
+5) ï¿½ï¿½ï¿½, Æ®ï¿½ï¿½, ï¿½ï¿½Å¸ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+6) ï¿½ï¿½ï¿½ï¿½ Ä¿ï¿½Çµå¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+7) ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Øºï¿½ ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¼Å©ï¿½Ñ´ï¿½.
+8) ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 */
 BYTE HardDiskHandler::WriteSectors(BYTE * DPF, UINT16 StartCylinder, BYTE StartHead, BYTE dwStartLBASector, BYTE NoOfSectors, BYTE * lpBuffer, BOOLEAN WithRetry)
 {
@@ -500,7 +519,7 @@ BYTE HardDiskHandler::GetNoOfDevices()
 	return GetTotalDevices();
 }
 
-//Æ¯Á¤ µğ¹ÙÀÌ½ºÀÇ ÆÄ¶ó¸ŞÅÍ Á¤º¸¸¦ ¾ò¾î³½´Ù.
+//Æ¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½î³½ï¿½ï¿½.
 UINT16 HardDiskHandler::GetDeviceParameters(BYTE * DPF, BYTE * pBuffer)
 {
 	VFS_IO_PARAMETER deviceInfo;
@@ -522,8 +541,8 @@ UINT16 HardDiskHandler::GetDeviceParameters(BYTE * DPF, BYTE * pBuffer)
 	return HDD_NO_ERROR;
 }
 
-//ÁÖ¾îÁø µğ¹ÙÀÌ½º ÄÁÆ®·Ñ·¯¸¦ ¸®¼ÂÇÏ°í ±× °á°ú¸¦ ¸®ÅÏÇÑ´Ù.
-//µğ¹ÙÀÌ½º ÄÁÆ®·Ñ·¯ÀÇ ¸®¼ÂÀº DoSoftwareReset ¸Ş¼Òµå¿¡¼­ ¼öÇàÇÑ´Ù.
+//ï¿½Ö¾ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+//ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ DoSoftwareReset ï¿½Ş¼Òµå¿¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 BYTE HardDiskHandler::Reset(BYTE * DPF)
 {
 	HDDInfo * getHDD;
@@ -537,7 +556,7 @@ BYTE HardDiskHandler::Reset(BYTE * DPF)
 
 }
 
-//ÁÖ¼Ò ¸ğµå º¯°æ CHS => LBA
+//ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ CHS => LBA
 UINT32 HardDiskHandler::CHSToLBA(BYTE * DPF, UINT32 Cylinder, UINT32 Head, UINT32 Sector)
 {
 	HDDInfo * getHDD;
@@ -546,7 +565,7 @@ UINT32 HardDiskHandler::CHSToLBA(BYTE * DPF, UINT32 Cylinder, UINT32 Head, UINT3
 	return (Sector - 1) + (Head*getHDD->CHSSectorCount) + (Cylinder * (getHDD->CHSHeadCount + 1) * getHDD->CHSSectorCount);
 }
 
-//ÁÖ¼Ò ¸ğµå º¯°æ LBA => CHS
+//ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ LBA => CHS
 void HardDiskHandler::LBAToCHS(BYTE * DPF, UINT32 LBA, UINT32 * Cylinder, UINT32 * Head, UINT32 * Sector)
 {
 	HDDInfo * getHDD;

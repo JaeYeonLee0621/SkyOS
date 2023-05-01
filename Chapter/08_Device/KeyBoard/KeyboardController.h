@@ -35,7 +35,7 @@
 #define KL3Rate 0x14
 #define KL4Rate 0x1F
 
-typedef struct Func_Key_tag	//Æã¼ÇÅ°, ÇÔ¼ö ¸ÅÇÎ
+typedef struct Func_Key_tag	//ï¿½ï¿½ï¿½Å°, ï¿½Ô¼ï¿½ ï¿½ï¿½ï¿½ï¿½
 {
 	bool enabled;
 	void (* func)();
@@ -48,8 +48,8 @@ private:
 	~KeyboardController();
 public:
 	static void HandleKeyboardInterrupt();
-	static char GetInput();		////¹öÆÛ¿¡ Å°º¸µå µ¥ÀÌÅÍ°¡ µé¾î¿Ã¶§±îÁö ´ë±âÇÑ´Ù.
-	static void UpdateLeds(unsigned char led);	//Å°º¸µå LED¸¦ ¾÷µ¥ÀÌÆ®ÇÑ´Ù.
+	static char GetInput();		////ï¿½ï¿½ï¿½Û¿ï¿½ Å°ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í°ï¿½ ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+	static void UpdateLeds(unsigned char led);	//Å°ï¿½ï¿½ï¿½ï¿½ LEDï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Ñ´ï¿½.
 	static int KeyboardController::SpecialKey(unsigned char key);
 
 	static void FlushBuffers();

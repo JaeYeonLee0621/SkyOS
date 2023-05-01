@@ -5,17 +5,17 @@
 
 extern void SendEOI();
 
-//Æ¯¼öÅ° »óÅÂ
+//Æ¯ï¿½ï¿½Å° ï¿½ï¿½ï¿½ï¿½
 bool shift = false;	
 bool ctrl = false;
 bool alt = false;
 bool caps = false;
 bool num = false;
 
-unsigned char leds = 0; //LED ¸¶½ºÅ©
-const unsigned int KEYBUFFSIZE = 129;	//Å° ¹öÆÛ »çÀÌÁî
+unsigned char leds = 0; //LED ï¿½ï¿½ï¿½ï¿½Å©
+const unsigned int KEYBUFFSIZE = 129;	//Å° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-Func_Key FKey[10] =		//Æã¼ÇÅ°¿¡ ÇÔ¼ö¸¦ ´ëÀÀ½ÃÄÑ¼­ Æ¯Á¤ ÇÔ¼ö¸¦ ½ÇÇàÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+Func_Key FKey[10] =		//ï¿½ï¿½ï¿½Å°ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¼ï¿½ Æ¯ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö°ï¿½ ï¿½Ñ´ï¿½.
 {						
         {false, 0},
         {false, 0},
@@ -29,7 +29,8 @@ Func_Key FKey[10] =		//Æã¼ÇÅ°¿¡ ÇÔ¼ö¸¦ ´ëÀÀ½ÃÄÑ¼­ Æ¯Á¤ ÇÔ¼ö¸¦ ½ÇÇàÇÒ ¼ö ÀÖ°Ô ÇÑ´
         {false, 0}
 };
 
-unsigned char normal[] = {					//Å°º¸µå Ä³¸¯ÅÍ ¸Ê
+// scan code ì™€ ASCII ì™€ì˜ ê´€ê³„
+unsigned char normal[] = {					
 	0x00,0x1B,'1','2','3','4','5','6','7','8','9','0','-','=','\b','\t',
 	'q','w','e','r','t','y','u','i','o','p','[',']',0x0D,0x80,
 	'a','s','d','f','g','h','j','k','l',';',047,0140,0x80,
@@ -38,7 +39,7 @@ unsigned char normal[] = {					//Å°º¸µå Ä³¸¯ÅÍ ¸Ê
 	0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
 	0x80,0x80,0x80,'0',0177
 };
-//½¬ÇÁÆ®Å°°¡ ´­·¯Áø °æ¿ì
+
 unsigned char shifted[] = {
 	0,033,'!','@','#','$','%','^','&','*','(',')','_','+','\b','\t',
 	'Q','W','E','R','T','Y','U','I','O','P','{','}',015,0x80,
@@ -49,7 +50,6 @@ unsigned char shifted[] = {
 	'1','2','3','0',177
 };
 
-//Caps LockÅ°°¡ È°¼ºÈ­µÈ °æ¿ì
 unsigned char capsNormal[] = {
 	0x00,0x1B,'1','2','3','4','5','6','7','8','9','0','-','=','\b','\t',
 	'Q','W','E','R','T','Y','U','I','O','P','[',']',0x0D,0x80,
@@ -60,7 +60,7 @@ unsigned char capsNormal[] = {
 	0x80,0x80,0x80,'0',0177
 };
 
-//½¬ÇÁÆ®Å° Caps LockÅ° µÑ´Ù ´©¸¥°æ¿ì
+//ï¿½ï¿½ï¿½ï¿½Æ®Å° Caps LockÅ° ï¿½Ñ´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 unsigned char capsShifted[] = {
 	0,033,'!','@','#','$','%','^','&','*','(',')','_','+','\b','\t',
 	'q','w','e','r','t','y','u','i','o','p','{','}',015,0x80,
@@ -71,9 +71,9 @@ unsigned char capsShifted[] = {
 	'1','2','3','0',177
 };
 
-char buffer[KEYBUFFSIZE];	//Å° ¹öÆÛ
-int  buffend = 0;		//¹öÆÛ¿¡ ÀúÀåµÈ ¸¶Áö¸· Å°°ªÀ» °¡¸®Å²´Ù.
-unsigned char scanCode;	//Å°º¸µå·ÎºÎÅÍ ¾òÀº ½ºÄµÄÚµå°ª
+char buffer[KEYBUFFSIZE];	//Å° ï¿½ï¿½ï¿½ï¿½
+int  buffend = 0;		//ï¿½ï¿½ï¿½Û¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å°ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Å²ï¿½ï¿½.
+unsigned char scanCode;	//Å°ï¿½ï¿½ï¿½ï¿½Îºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Äµï¿½Úµå°ª
 
 
 KeyboardController::KeyboardController()
@@ -84,7 +84,7 @@ KeyboardController::~KeyboardController()
 {
 }
 
-void KeyboardController::UpdateLeds(unsigned char led)	//Å°º¸µå LED¸¦ ¾÷µ¥ÀÌÆ®ÇÑ´Ù.
+void KeyboardController::UpdateLeds(unsigned char led)	//Å°ï¿½ï¿½ï¿½ï¿½ LEDï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Ñ´ï¿½.
 {
 	if(led == 0)
 	{
@@ -92,49 +92,51 @@ void KeyboardController::UpdateLeds(unsigned char led)	//Å°º¸µå LED¸¦ ¾÷µ¥ÀÌÆ®ÇÑ
 	}
 	else
 	{
-		if (leds == (leds|led))	//LED°¡ ÄÑÁ® ÀÖ´Ù¸é
+		if (leds == (leds|led))	//LEDï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ù¸ï¿½
 		{
-			leds = leds^led;	//LED¸¦ ²ö´Ù
+			leds = leds^led;	//LEDï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		}
 		else
 		{
-			leds = leds | led;	// LED¸¦ ÄÒ´Ù
+			leds = leds | led;	// LEDï¿½ï¿½ ï¿½Ò´ï¿½
 		}
 	}
 
-	//Ä¿¸Çµå ¹ÙÀÌÆ®¸¦ º¸³»°í °á°ú¸¦ ¾òÀ»¶§±îÁö
-	//·çÇÁ¸¦ µ·´Ù
 	OutPortByte(0x64, 0xED);
 	while ((InPortByte(0x64) % 2) == 2)
 		;
-	//LED »óÅÂ¸¦ ¾÷µ¥ÀÌÆ® ÇÑ´Ù.
 	OutPortByte(0x60, leds);
 	
 }
 
-	
-//Å°º¸µå ÀÎÅÍ·´Æ® ÇÚµé·¯
+
+// Stack Frame ì„ í˜•ì„±í•˜ì§€ ì•Šê¸° ë•Œë¬¸ì— í•¨ìˆ˜ ì•ì— _declspec(naked) keyword ëª…ì‹œ
+// interrupt handler ì‹¤í–‰ ì¤‘ì— ë˜ ë‹¤ë¥¸ interrupt ìƒí™©ì„ ë°©ì§€í•˜ê¸° ìœ„í•´ interrupt ë°œìƒì„ ë§‰ëŠ” Assembly CLI ë¥¼ ì‚¬ìš©
+
 __declspec(naked) void KeyboardHandler()
 {
-	//·¹Áö½ºÅÍ¸¦ ÀúÀåÇÏ°í ÀÎÅÍ·´Æ®¸¦ ²ö´Ù.
+
+	// Register ë¥¼ ì €ì¥í•˜ê³  interrupt ë¥¼ ë”
+	// _asm : inline assembly
 	_asm
 	{
-		PUSHAD
+		PUSHAD // ê¸°ë³¸ register ê°’ì„ stack ì— ì €ì¥
 		PUSHFD
-		CLI
+		CLI // interrupt ë°œìƒì„ ë§‰ìŒ
 	}
 
-	// ½ºÅÃ»óÅÂ°¡ º¯°æµÇ´Â °ÍÀ» ¸·±â À§ÇØ ÇÔ¼ö¸¦ È£ÃâÇÑ´Ù. 
+	// Stack ìƒíƒœê°€ ë³€í•˜ëŠ” ê²ƒì„ ë§‰ê¸° ìœ„í•´ í•¨ìˆ˜ í˜¸ì¶œ
+	// call : í•¨ìˆ˜ í˜¸ì¶œ
 	_asm call KeyboardController::HandleKeyboardInterrupt
 
 	SendEOI();
 
-	// ·¹Áö½ºÅÍ¸¦ º¹¿øÇÏ°í ¿ø·¡ ¼öÇàÇÏ´ø °÷À¸·Î µ¹¾Æ°£´Ù.
+	// Register ë¥¼ ë³µì›í•˜ê³  ì›ë˜ ìˆ˜í–‰í•˜ë˜ ê³³ìœ¼ë¡œ ëŒì•„ê°
 	_asm
 	{
-		POPFD
+		POPFD // ê¸°ë³¸ register ê°’ì„ stack ì—ì„œ ë³µì›
 		POPAD
-		IRETD
+		IRETD // ì›ë˜ ìˆ˜í–‰í•˜ë˜ ì½”ë“œë¡œ ë³µì›í•˜ëŠ” ëª…ë ¹ì–´ (code ìˆ˜í–‰ íë¦„ ë³€ê²½)
 	}
 }
 
@@ -290,38 +292,43 @@ void KeyboardController::FlushBuffers()
 void KeyboardController::SetupInterrupts()
 {
 	FlushBuffers();
+	
+	// interrupt number 3 ì—ì„œ ë°œìƒ
 	setvect(33, KeyboardHandler);
 }
 
 void KeyboardController::SetLEDs(bool scroll, bool number, bool capslk)
 {
-	//Bit 1 : ½ºÅ©·Ñ ¶ô LED¸¦ ÄÒ´Ù.
 	unsigned char status = scroll ? 1 : 0;
 
 	if (number)	//Bit 2 : Num Lock
 		status |= 2;
 	if (capslk)//Bit 3:	Caps Lock
 		status |= 4;
-	//Ä¿¸Çµå ¹öÆÛ°¡ ºñ¿öÁú¶§ ±îÁö ´ë±âÇÑ´Ù.
+
 	while ((InPortByte(0x64) & 2) == 2)
 		;
-	//Ä¿¸Çµå¸¦ º¸³»°í °á°ú°¡ ¿Ã¶§±îÁö ´ë±â
+
 	OutPortByte(0x64, 0xED);
+
 	while ((InPortByte(0x64) % 2) == 2)
 		;
-	//LED »óÅÂ ¾÷µ¥ÀÌÆ®¸¦ ¿äÃ»ÇÑ´Ù.
+
 	OutPortByte(0x60, status);
 }
 
-char KeyboardController::GetInput()		//Å°º¸µå µ¥ÀÌÅÍ¸¦ ¿ÜºÎ¿¡ ÁÖ±âÀ§ÇØ Á¦°øµÇ´Â ¸Ş¼Òµå
+char KeyboardController::GetInput()	
 {
 	int i = 0;
-	while (buffend == 0) //Å°º¸µå µ¥ÀÌÅÍ°¡ µé¾î¿Ã¶§±îÁö ´ë±âÇÑ´Ù.
+
+	// Keyboard ë¡œ data ê°€ ë“¤ì–´ì˜¬ ë•Œê¹Œì§€ ê¸°ë‹¤ë¦¼
+	while (buffend == 0) 
 	{		
 		//msleep(10);
 	}
 
-	kEnterCriticalSection();		//¹öÆÛ¸¦ ¼öÁ¤ÇÏ´Â µ¿¾È ÀÎÅÍ·´Æ®¸¦ ºñÈ°¼ºÈ­½ÃÅ²´Ù.
+	// buffer ë¥¼ ìˆ˜ì •í•˜ëŠ” ë™ì•ˆ interrupt ë¹„í™œì„±í™”
+	kEnterCriticalSection();	
 
 	for (; i < buffend; i++)
 	{
@@ -329,7 +336,8 @@ char KeyboardController::GetInput()		//Å°º¸µå µ¥ÀÌÅÍ¸¦ ¿ÜºÎ¿¡ ÁÖ±âÀ§ÇØ Á¦°øµÇ´Â 
 	}
 	buffend--;
 
-	kLeaveCriticalSection();//ÀÎÅÍ·´Æ®¸¦ È°¼ºÈ­ÇÑ´Ù.
+	// interrupt í™œì„±í™”
+	kLeaveCriticalSection();
 
 	return buffer[0];
 }
@@ -338,11 +346,12 @@ void KeyboardController::HandleKeyboardInterrupt()
 {
 	unsigned char asciiCode;
 
-	scanCode = InPortByte(0x60);	//Å° ½ºÄµÄÚµå¸¦ ¾ò´Â´Ù.
+	scanCode = InPortByte(0x60);	// Key scan code ë¥¼ ì–»ìŒ
 
-	if (!(SpecialKey(scanCode) | (scanCode >= 0x80))) //¾Æ½ºÅ°ÄÚµå¶ó¸é
+	if (!(SpecialKey(scanCode) | (scanCode >= 0x80))) // ASCII ì½”ë“œë¼ë©´
 	{
-		if (shift)		//½¬ÇÁÆ®Å°¿Í Caps Lock »óÅÂ¿¡ µû¸¥ ÀûÀıÇÑ ¾Æ½ºÅ°°ªÀ» ¾ò¾î¿Â´Ù.
+		// shift Key ì™€ Caps Lock ìƒíƒœì˜ ì ì ˆí•œ ASCII ê°’ì„ ì–»ìŒ
+		if (shift)
 		{
 			if (!caps)
 			{
@@ -365,7 +374,7 @@ void KeyboardController::HandleKeyboardInterrupt()
 			}
 		}
 
-		//Å°¹öÆÛ¿¡ ¾Æ½ºÅ°°ªÀ» ±â·ÏÇÑ´Ù.
+		// Key buffer ì— ASCII ê°’ ê¸°ë¡
 		if (buffend != (KEYBUFFSIZE - 1))
 		{
 			buffend++;

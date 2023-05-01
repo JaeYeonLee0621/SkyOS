@@ -6,7 +6,7 @@
 class HardDiskHandler
 	{
 	private:
-		Collection <HDDInfo *> HDDs;
+		Collection <HDDInfo *> HDDs; // Ïù∏ÏãùÌïú HD Ï†ïÎ≥¥ Î™®Ïùå
 		void (*InterruptHandler)();
 		static BYTE DoSoftwareReset(UINT16 deviceController);
 		BYTE m_lastError;
@@ -23,7 +23,6 @@ class HardDiskHandler
 
 		HDDInfo * GetHDDInfo(BYTE * DPF);
 
-//¡÷º“∏µÂ ∫Ø»Ø
 		UINT32 CHSToLBA(BYTE *DPF, UINT32 Cylinder, UINT32 Head, UINT32 Sector);
 		void LBAToCHS(BYTE *DPF, UINT32 LBA, UINT32 * Cylinder, UINT32 * Head, UINT32 * Sector);
 
@@ -31,7 +30,6 @@ class HardDiskHandler
 		BYTE ReadSectors(BYTE * DPF, UINT32 StartLBASector, BYTE NoOfSectors, BYTE * buffer, BOOLEAN WithRetry = TRUE);
 		BYTE WriteSectors(BYTE * DPF, UINT16 StartCylinder, BYTE StartHead, BYTE StartSector, BYTE NoOfSectors, BYTE * Buffer, BOOLEAN WithRetry = TRUE);
 	
-		//∞°ªÛ ∆ƒ¿œ Ω√Ω∫≈€¿ª ¿ß«— ∏ﬁº“µÂ
 		BYTE GetNoOfDevices();
 		UINT16 GetDeviceParameters(BYTE * DPF, BYTE * Buffer);
 		BYTE Reset(BYTE * DPF);		
