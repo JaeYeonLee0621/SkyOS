@@ -5,6 +5,7 @@
 - 실제 코드 실행은 Thread 에서 수행되는데, `하나의 Process 에는 복수개의 Thread 가 존재` 하며
 - `이런 Thread 는 Virtual Address Space 를 공유` 
 
+<br/>
 
 ### 32bit window OS 에서는 4GB Virtual Address Space 이 주어짐
 - 이 중 2GB 까지는 응용 프로그램이 사용할 수 있는 주소 공간
@@ -14,6 +15,7 @@
 System API 를 호출해서 간접적으로 Kernel Code 수행
 
 
+<br/>
 <br/>
 
 
@@ -25,60 +27,75 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 - `Segmentation` : 프로그램의 가상 주소를 Linear Address 로 변환하는 과정
 - `Paging` : Linear Address 를 얻었으면, 이 값을 이용해서 실제 물리 메모리를 기술하는 Page 를 찾음
 
-=> 32bit 에서 보통 Page 의 크기 4KB
-ex) 4GB Memory 에서 4KB Page 크기 = `2^20 개의 Page` 를 가지고 있음
+<br/>
+
+**32bit 에서 보통 Page 의 크기 4KB**
+
+- 32 bit address 에서는 4GB Memory 를 사용할 수 있고
+- 4KB Page 는 4GB 에서 `2^20 개의 Page` 를 가질 수 있음
+- `2^20 개` 의 Page 를 저장할 수 있는 Table 이 존재해야 함
 
 
 <br/>
+<br/>
 
-![VM](https://user-images.githubusercontent.com/32635539/235419731-c3a7f73d-858f-4f93-8a9e-c9edd2cf5b45.png)
 
 
 # 과정
 
-## [Segmentation 을 거쳐 Linesar Address 를 얻어냄]
+![VM](https://user-images.githubusercontent.com/32635539/235419731-c3a7f73d-858f-4f93-8a9e-c9edd2cf5b45.png)
+
+<br/>
+
+## 1. Segmentation 을 거쳐 Linear Address 를 얻어냄
 
 - `Linear Address` = `Page directory entry index address (10bit)` + `Page table entry index address (10bit)` + `offset (12bit)`
 
+<br/>
 
-
-## [Page Directory]
+## 2. Page Directory
 
 - 10bit address = 1024 개
 - Page Table 이 있는 address 를 모아놓은 곳
-- PDBR Register 가 Page Directory 에 대한 Base Pointer 유지
+- `PDBR (Page Directory Base Register)` 가 Page Directory 에 대한 Base Pointer 유지
 - 한 개의 값들을 Page Directory Entry 라고 부름
 
-> Page Directory Entry
+**Page Directory Entry**
 - 4byte 의 크기를 가짐
 - 여러 가지 Flag 와 Page Table 의 Base Address에 대한 정보를 가지고 있음
 
+<br/>
 
-## [Page Table]
+## 3. Page Table
 
 - 10bit address = 1024 개 
 - Page 의 Physical Address 가 저장됨
 - 한 개의 값들을 Page Table Entry 라고 부름
 
-> Page Table Entry
+**Page Table Entry**
 - 20bit 의 크기를 가짐
 
+> +) 왜 20 bit?
 
-## [Page Physical Address]
+- 4GB 에서 4KB 의 Page 크기 = 2^20 개의 Page 가 들어갈 수 있음
+- 따라서 Page 의 Address 는 20bit 여야 함
+
+<br/>
+
+## 4. Page Physical Address
 - Page Table 의 20bit Address = 해당 Page 가 있는 시작 주소
 - Linear Address 의 Offset 12bit = Base Address 부터 올라가야 하는 Offset
 - 해당 부분이 실제 Page 가 있는 Physical Address
 
+<br/>
 
-> 1024 * 1024 * 4KB = 4GB
-> 2^20 개의 Page 개수
+- 1024 * 1024 * 4KB = 4GB
+- 2^20 개의 Page 개수
 
-=> 특정 Process의 Memory 침범으로 인해 다른 Process 가 망가지는 것을 막을 수 있음
+> 특정 Process의 Memory 침범으로 인해 다른 Process 가 망가지는 것을 막을 수 있음
 
+<br/>
 
-> 그런데 4GB 에 접근하기 위해 모든 Page Table 이 메모리에 생성된다면 굉장한 메모리 낭비
-Page Table 의 크기는 4KB = 1024 * 4byte
-
-이 값은 Process 하나 당 필요로 하는 값이며 Process 가 많아지면 메모리 사용량은 더 증가
-
-> 일반적으로는 4GB 전 공간에 접근한다고 하더라도 실제 접근할 수 있는 주소는 한정돼 있기 때문에 모든 Page Table 을 생성하지는 않음
+- 그런데 4GB 에 접근하기 위해 모든 Page Table 이 메모리에 생성된다면 굉장한 메모리 낭비 (Page Table 의 크기는 4KB = 1024 * 4byte)
+- 이 값은 Process 하나 당 필요로 하는 값이며 Process 가 많아지면 메모리 사용량은 더 증가
+- 일반적으로는 4GB 전 공간에 접근한다고 하더라도 실제 접근할 수 있는 주소는 한정돼 있기 때문에 모든 Page Table 을 생성하지는 않음
