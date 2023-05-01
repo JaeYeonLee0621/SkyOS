@@ -65,6 +65,15 @@ void kmain(unsigned long magic, unsigned long addr)
 
 	kLeaveCriticalSection(&g_criticalSection);
 
+	/*
+
+	- 첫 번째 인자 : frequency (100 = 1초 당 진동수 100번 즉 1초당 100번의 timer interrupt 가 발생)
+	즉 PIT 는 1초당 1193181 번의 숫자를 Count 한다고 했으니
+	100은 0.01초 즉 11931 을 Count 하면 interrupt 한 번 발생
+	- 두 번째 인자 : 사용할 Counter Register
+	- 세 번째 인자 : Control Register 의 1~3 bit 에 설정하는 부분 - Timer Counting 방식을 설정
+
+	*/
 	StartPITCounter(100, I86_PIT_OCW_COUNTER_0, I86_PIT_OCW_MODE_SQUAREWAVEGEN);
 		
 	for (;;);

@@ -12,7 +12,14 @@ extern void SendEOI();
 volatile uint32_t _pitTicks = 0;
 DWORD _lastTickCount = 0;
 
-//Å¸ÀÌ¸Ó ÀÎÅÍ·´Æ® ÇÚµé·¯
+
+/*
+
+[PIT (Programmable Interval Timer)]
+- ì¼ìƒì ì¸ Timing ì œì–´ ë¬¸ì œë¥¼ í•´ê²°í•˜ê¸° ìœ„í•´ ì„¤ê³„ëœ Counter/Timer device
+
+*/
+
 __declspec(naked) void InterruptPITHandler() 
 {	
 	_asm
@@ -22,17 +29,18 @@ __declspec(naked) void InterruptPITHandler()
 		CLI
 	}
 
+	// ë‘ ê°œì˜ ë³€ìˆ˜ ì°¨ì´ê°€ 100ì¼ ë•Œ = 1ì´ˆ ë§ˆë‹¤
 	if (_pitTicks - _lastTickCount >= 100)
 	{
 		_lastTickCount = _pitTicks;
 		SkyConsole::Print("Timer Count : %d\n", _pitTicks);
 	}
 
+	// Timer interrupt handler ê°€ í˜¸ì¶œë  ë•Œë§ˆë‹¤ Count ì¦ê°€
 	_pitTicks++;
 	
 	SendEOI();
 
-	// ·¹Áö½ºÅÍ¸¦ º¹¿øÇÏ°í ¿ø·¡ ¼öÇàÇÏ´ø °÷À¸·Î µ¹¾Æ°£´Ù.
 	_asm
 	{
 		POPFD
@@ -41,7 +49,8 @@ __declspec(naked) void InterruptPITHandler()
 	}
 }
 
-//Å¸ÀÌ¸Ó¸¦ ½ÃÀÛ
+// Timer ë„ interrupt í˜•íƒœë¡œ CPU ì— ì œê³µ
+// ìš°ë¦¬ëŠ” interrupt service routine ì„ êµ¬í˜„í•´ì•¼ í•¨
 void StartPITCounter(uint32_t freq, uint8_t counter, uint8_t mode) {
 
 	if (freq == 0)
@@ -49,22 +58,22 @@ void StartPITCounter(uint32_t freq, uint8_t counter, uint8_t mode) {
 
 	uint16_t divisor = uint16_t(1193181 / (uint16_t)freq);
 
-	//Ä¿¸Çµå Àü¼Û
+	// command ì „ì†¡
 	uint8_t ocw = 0;
 	ocw = (ocw & ~I86_PIT_OCW_MASK_MODE) | mode;
 	ocw = (ocw & ~I86_PIT_OCW_MASK_RL) | I86_PIT_OCW_RL_DATA;
 	ocw = (ocw & ~I86_PIT_OCW_MASK_COUNTER) | counter;
 	SendPITCommand(ocw);
 
-	//ÇÁ¸®Äö½Ã ºñÀ² ¼³Á¤
+	// frequency ratio ì„¤ì •
 	SendPITData(divisor & 0xff, 0);
 	SendPITData((divisor >> 8) & 0xff, 0);
 
-	//Å¸ÀÌ¸Ó Æ½ Ä«¿îÆ® ¸®¼Â
+	// timer tick count reset
 	_pitTicks = 0;
 }
 
-//PIT ÃÊ±âÈ­
+// PIT ì´ˆê¸°í™”
 void InitializePIT()
 {
 	setvect(32, InterruptPITHandler);

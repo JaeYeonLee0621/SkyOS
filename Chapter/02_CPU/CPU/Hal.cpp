@@ -3,16 +3,19 @@
 #include "IDT.h"
 #include "SkyAPI.h"
 
+// 1byte 를 PIC 에 씀
 void OutPortByte(ushort port, uchar value)
 {
 	_outp(port, value);
 }
 
+// 2byte 를 PIC 에 씀
 void OutPortWord(ushort port, ushort value)
 {
 	_outpw(port, value);
 }
 
+// 4byte 를 PIC 에 씀
 void OutPortDWord(ushort port, unsigned int value)
 {
 	_outpd(port, value);

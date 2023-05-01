@@ -10,7 +10,6 @@
 volatile uint32_t _pitTicks = 0;
 DWORD _lastTickCount = 0;
 
-//타이머 인터럽트 핸들러
 __declspec(naked) void InterruptPITHandler() 
 {	
 	_asm {
@@ -29,7 +28,6 @@ __declspec(naked) void InterruptPITHandler()
 	}
 }
 
-//타이머를 시작
 void StartPITCounter(uint32_t freq, uint8_t counter, uint8_t mode) {
 
 	if (freq == 0)
@@ -37,22 +35,18 @@ void StartPITCounter(uint32_t freq, uint8_t counter, uint8_t mode) {
 
 	uint16_t divisor = uint16_t(1193181 / (uint16_t)freq);
 
-	//커맨드 전송
 	uint8_t ocw = 0;
 	ocw = (ocw & ~I86_PIT_OCW_MASK_MODE) | mode;
 	ocw = (ocw & ~I86_PIT_OCW_MASK_RL) | I86_PIT_OCW_RL_DATA;
 	ocw = (ocw & ~I86_PIT_OCW_MASK_COUNTER) | counter;
 	SendPITCommand(ocw);
 
-	//프리퀀시 비율 설정
 	SendPITData(divisor & 0xff, 0);
 	SendPITData((divisor >> 8) & 0xff, 0);
 
-	//타이머 틱 카운트 리셋
 	_pitTicks = 0;
 }
 
-//PIT 초기화
 void InitializePIT()
 {
 	setvect(32, InterruptPITHandler);

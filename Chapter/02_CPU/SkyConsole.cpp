@@ -166,7 +166,7 @@ namespace SkyConsole
 
 				switch (str[i + 1]) {
 
-					/*** characters ***/
+				/*** characters ***/
 				case 'c': {
 					char c = va_arg(args, char);
 					WriteChar(c, m_Text, m_backGroundColor);
@@ -174,7 +174,7 @@ namespace SkyConsole
 					break;
 				}
 
-						  /*** address of ***/
+				/*** address of ***/
 				case 's': {
 					const char * c = (const char *&)va_arg(args, char);
 					char str[256];
@@ -184,7 +184,7 @@ namespace SkyConsole
 					break;
 				}
 
-						  /*** integers ***/
+				/*** integers ***/
 				case 'd':
 				case 'i': {
 					int c = va_arg(args, int);
@@ -195,8 +195,8 @@ namespace SkyConsole
 					break;
 				}
 
-						  /*** display in hex ***/
-						  /*int*/
+				/*** display in hex ***/
+				/*int*/
 				case 'X': {
 					int c = va_arg(args, int);
 					char str[32] = { 0 };
@@ -205,7 +205,8 @@ namespace SkyConsole
 					i++;		// go to next character
 					break;
 				}
-						  /*unsigned int*/
+				
+				/*unsigned int*/
 				case 'x': {
 					unsigned int c = va_arg(args, unsigned int);
 					char str[32] = { 0 };

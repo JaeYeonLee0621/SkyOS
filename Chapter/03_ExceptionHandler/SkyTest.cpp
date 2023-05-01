@@ -2,7 +2,7 @@
 #include "SkyConsole.h"
 #include "MultiBoot.h"
 
-//ÀÎÅÍ·´Æ® ÇÚµé·¯ Å×½ºÆ®
+//ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½Úµé·¯ ï¿½×½ï¿½Æ®
 void TestDivideByZero();
 void TestBreakPoint();
 void TestInvalidOpcode();
@@ -20,22 +20,18 @@ void TestDivideByZero()
 {	
 	int result = _dividend / _divider;
 
-//¿¹¿ÜÃ³¸®¸¦ ÅëÇØ ¾Æ·¡ ÄÚµå°¡ ½ÇÇàµÈ´Ù°í ÇØµµ
-//result °á°ú´Â Á¤»óÀûÀÎ °ªÀÌ ¾Æ´Ï´Ù
-//À§ÀÇ ÇÑÁÙÀº ¾î¼Àºí¸® ¸í·É¾î´Ü¿¡¼­ º¸¸é ¿©·¯ ÁÙÀÌ¸ç 
-//Áß°£Á¤µµ¿¡¼­ ¿Àµ¿ÀÛ ºÎºĞÀ» ¼öÁ¤Çß´Ù ÇØ¼­ Á¤»óÀûÀÎ °á°ú¸¦ ±â´ëÇÏ´Â °ÍÀº ¹«¸®´Ù.
-
 	if(_divider != 0)
 		result = _dividend / _divider;
 
 	SkyConsole::Print("Result is %d, divider : %d\n", result, _divider);
 }
 
+// _emit : í•´ë‹¹ ìœ„ì¹˜ì— byte ë¥¼ ì”€
 void funcBreakPoint(void)
 {
 	__asm {
 		align 4		
-		__asm _emit 0xcc
+		__asm _emit 0xcc // break point interrupt ì£¼ì†Œ
 		__asm _emit 0x00
 		__asm _emit 0x00
 		__asm _emit 0x00
@@ -57,7 +53,7 @@ void TestInvalidOpcode()
 		__asm _emit 0xFF
 	}
 }
-//ÀÎÅÍ·´Æ® ÇÚµé·¯ Å×½ºÆ® ³¡
+//ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½Úµé·¯ ï¿½×½ï¿½Æ® ï¿½ï¿½
 
 
 

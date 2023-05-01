@@ -24,6 +24,10 @@ The system has been halted.\n\n";
 	SkyConsole::Print(disclamer);
 }
 
+// extern
+// - compile time : 어딘가에 존재한다
+// - linking time : 변수의 위치를 찾음
+
 extern int _divider;
 extern int _dividend;
 

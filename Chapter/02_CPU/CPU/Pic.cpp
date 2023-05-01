@@ -73,8 +73,32 @@
 #define I86_PIC_ICW4_SFNM_NESTEDMODE	0x10		//10000
 #define I86_PIC_ICW4_SFNM_NOTNESTED		0			//a binary 2 (futurama joke hehe ;)
 
+/*
 
-//PIC·Î ¸í·ÉÀ» º¸³½´Ù
+[PIC (Programmable Interrupt Controller)]
+
+- Hardware ê°€ ì œê³µí•˜ëŠ” ì‹ í˜¸ë¥¼ CPU ì—ì„œ ì–´ë–»ê²Œ ë°›ì•„ë“¤ì´ëŠ”ì§€ ì²˜ë¦¬
+- Keyboard, Mouse ë“±ì„ CPU ì— ì „ë‹¬í•˜ëŠ” ì œì–´ê¸°
+
+[ê³¼ì • - Master PIC]
+1. master PIC ì—ì„œ interrupt ê°€ ë°œìƒ
+2. master PIC ëŠ” ìì‹ ì˜ INT ì— ì‹ í˜¸ë¥¼ ì‹£ê³  CPU ì˜ INT ì— ì „ë‹¬
+3. CPU ê°€ interrupt ë¥¼ ë°›ìœ¼ë©´ EFLAG ì˜ IE bit ë¥¼ 1ë¡œ ì„¸íŒ…í•˜ê³ , INTA ë¥¼ í†µí•´ ë°›ì•˜ë‹¤ëŠ” ì‹ í˜¸ë¥¼ PIC ì— ì „ë‹¬
+4. CPU ëŠ” í˜„ì¬ ì‹¤í–‰ ëª¨ë“œê°€ ë³´í˜¸ ëª¨ë“œë¼ë©´ IDT descriptor ë¥¼ ì°¾ì•„ì„œ interrupt handlerë¥¼ ì‹¤í–‰
+
+[ê³¼ì • - Slave PIC]
+1. Slave PIC ì—ì„œ interrupt ë°œìƒ
+2. Slave PIC ëŠ” ìì‹ ì˜ INT íŒì— ì‹ í˜¸ë¥¼ ì‹£ê³ , master PIC IRQ 2ë²ˆì— interrup signal ì„ ë³´ëƒ„
+3. master PIC ëŠ” ìœ„ì—ì„œ ì„¤ëª…í•œ 5ê°€ì§€ ì ˆì°¨ë¥¼ ì§„í–‰
+
+IRQ HW interrupt ê°€ ë°œìƒí•  ë•Œ ì ì ˆíˆ ì‘ë™í•˜ë„ë¡ í•˜ê¸° ìœ„í•´ PICê°€ ê°€ì§„ ê° IRQë¥¼ ì´ˆê¸°í™” í•´ì¤˜ì•¼ í•¨
+ì´ë¥¼ ìœ„í•´ master PIC ì˜ ëª…ë ¹ register ë¡œ ëª…ë ¹ì„ ì „ë‹¬í•´ì•¼í•¨
+ì´ë•Œ ICW (Initialization control Word) ê°€ ì‚¬ìš©
+ICW ëŠ” 4ê°€ì§€ ì´ˆê¸°í™” ëª…ë ¹ì–´ë¡œ êµ¬ì„±
+
+*/
+
+// PIC ë¡œ ëª…ë ¹ì–´ ì „ì†¡
 inline void SendCommandToPIC(uint8_t cmd, uint8_t picNum) {
 
 	if (picNum > 1)
@@ -84,8 +108,7 @@ inline void SendCommandToPIC(uint8_t cmd, uint8_t picNum) {
 	OutPortByte(reg, cmd);
 }
 
-
-//PIC·Î µ¥ÀÌÅÍ¸¦ º¸³½´Ù.
+// PIC ë¡œ ë°ì´í„°ë¥¼ ë³´ëƒ„
 inline void SendDataToPIC(uint8_t data, uint8_t picNum) {
 
 	if (picNum > 1)
@@ -95,8 +118,7 @@ inline void SendDataToPIC(uint8_t data, uint8_t picNum) {
 	OutPortByte(reg, data);
 }
 
-
-//PIC·ÎºÎÅÍ 1¹ÙÀÌÆ®¸¦ ÀĞ´Â´Ù
+// PIC ë¡œë¶€í„° 1byte ë¥¼ ì½ìŒ
 inline uint8_t ReadDataFromPIC(uint8_t picNum) {
 
 	if (picNum > 1)
@@ -110,28 +132,30 @@ void PICInitialize(uint8_t base0, uint8_t base1) {
 
 	uint8_t		icw = 0;
 
-	//PIC ÃÊ±âÈ­ ICW1 ¸í·ÉÀ» º¸³½´Ù.
+	// PIC initialization ICW1 ëª…ë ¹ì„ ë³´ëƒ„
 	icw = (icw & ~I86_PIC_ICW1_MASK_INIT) | I86_PIC_ICW1_INIT_YES;
 	icw = (icw & ~I86_PIC_ICW1_MASK_IC4) | I86_PIC_ICW1_IC4_EXPECT;
 
 	SendCommandToPIC(icw, 0);
 	SendCommandToPIC(icw, 1);
 
-	//! PIC¿¡ ICW2 ¸í·ÉÀ» º¸³½´Ù. base0¿Í base1Àº IRQÀÇ º£ÀÌ½º ÁÖ¼Ò¸¦ ÀÇ¹ÌÇÑ´Ù.
+	// PIC ì— ICW2 ëª…ë ¹ì„ ë³´ëƒ„
+	// base0, base2 = IRQ ì˜ base address
 	SendDataToPIC(base0, 0);
 	SendDataToPIC(base1, 1);
-
-	//PIC¿¡ ICW3 ¸í·ÉÀ» º¸³½´Ù. ¸¶½ºÅÍ¿Í ½½·¹ÀÌºê PIC¿ÍÀÇ °ü°è¸¦ Á¤¸³ÇÑ´Ù.
 	
+	// PIC ì— ICW3 ëª…ë ¹ì„ ë³´ëƒ„
+	// master & slave  PIC ì™€ì˜ ê´€ê³„ ì •ë¦½
 	SendDataToPIC(0x04, 0);
 	SendDataToPIC(0x02, 1);
 
-	//ICW4 ¸í·ÉÀ» º¸³½´Ù. i86 ¸ğµå¸¦ È°¼ºÈ­ ÇÑ´Ù.
-
+	// ICW4 ëª…ë ¹ì„ ë³´ëƒ„
+	// i86 mode í™œì„±í™”
 	icw = (icw & ~I86_PIC_ICW4_MASK_UPM) | I86_PIC_ICW4_UPM_86MODE;
 
 	SendDataToPIC(icw, 0);
 	SendDataToPIC(icw, 1);
-	//PIC ÃÊ±âÈ­ ¿Ï·á
+
+	// PIC initialization ì™„ë£Œ
 }
 
