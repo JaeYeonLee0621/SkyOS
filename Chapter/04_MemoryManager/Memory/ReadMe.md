@@ -83,7 +83,9 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 - Linear Address 의 Offset 12bit = Base Address 부터 올라가야 하는 Offset
 - 해당 부분이 실제 Page 가 있는 Physical Address
 
-<br/>
+<hr/>
+
+즉 
 
 - 1024 * 1024 * 4KB = 4GB
 
