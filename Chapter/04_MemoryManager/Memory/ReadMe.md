@@ -34,6 +34,7 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 - 32 bit address 에서는 4GB Memory 를 사용할 수 있고
 - 4KB Page 는 4GB 에서 `2^20 개의 Page` 를 가질 수 있음
 - `2^20 개` 의 Page 를 저장할 수 있는 Table 이 존재해야 함
+- 즉 Page 를 저장하는 공간의 Address 가 20bit 여야함
 
 
 <br/>
@@ -81,8 +82,8 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 <br/>
 
 ## 4. Page Physical Address
-- Page Table 의 20bit Address = 해당 Page 가 있는 시작 주소
-- Linear Address 의 Offset 12bit = Base Address 부터 올라가야 하는 Offset
+- 20bit Address = 해당 Page 가 있는 시작 주소
+- Linear Address 의 Offset 12bit 를 이용하여 계산
 - 해당 부분이 실제 Page 가 있는 Physical Address
 
 <hr/>
