@@ -75,6 +75,8 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 **Page Table Entry**
 - 4byte 의 크기를 가짐
 - 그런데 20bit 만 사용 나머지는 offset 으로 이용
+- 왜냐하면 Page 개수가 2^20 개 (4GB memory / 4KB page size)
+- 따라서 20bit 의 주소 필요
 
 <br/>
 
