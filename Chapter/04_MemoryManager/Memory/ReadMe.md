@@ -14,6 +14,8 @@
 System API 를 호출해서 간접적으로 Kernel Code 수행
 
 
+<br/>
+
 
 # [Paging]
 - 메모리 공간을 Page 단위로 나눠서 사용하는 방법
@@ -27,10 +29,17 @@ System API 를 호출해서 간접적으로 Kernel Code 수행
 ex) 4GB Memory 에서 4KB Page 크기 = `2^20 개의 Page` 를 가지고 있음
 
 
-# [Segmentation 을 거쳐 Linesar Address 를 얻어냄]
-+) http://valhalla.bofh.pl/~l4mer/WDM/secureread/pde-pte.htm
+<br/>
 
-- Linear Address = Page directory entry index address (10bit) + Page table entry index address (10bit) + offset (12bit)
+![VM](https://user-images.githubusercontent.com/32635539/235419731-c3a7f73d-858f-4f93-8a9e-c9edd2cf5b45.png)
+
+
+# 과정
+
+## [Segmentation 을 거쳐 Linesar Address 를 얻어냄]
+
+- `Linear Address` = `Page directory entry index address (10bit)` + `Page table entry index address (10bit)` + `offset (12bit)`
+
 
 
 ## [Page Directory]
