@@ -80,3 +80,40 @@
 - `is_hole` : is allocated memory space
 - `size` : header structure size
 - `magic` : checksum, 값이 수정되었다면, heap curruption 이 일어났다는 것
+
+<br/>
+<br/>
+
+# Allocation
+
+- 기본적으로 Memory Allocation 시 error check & memory fragmentation 을 최소화 하는 방향으로 새로운 hole 생성
+
+![image](https://user-images.githubusercontent.com/32635539/235461990-33e76a1f-9541-4cec-9fdc-da4a32bd0bf2.png)
+
+1. 요청된 memory size 를 수용할 수 있는 가장 작은 hole 을 찾기 위해 index table 검사
+- index table 은 memory size 가 작은 순으로 정렬돼 있기 때문에 요구된 크기에 맞는 hole 을 찾을 때까지 index table 크기를 선형 검색
+
+2. 할당하려는 memory size 가 매우 커서 이를 만족시킬 수 있는 hole 이 없다면, heap 의 size 를 늘임
+
+3. hole 을 생성한 뒤 header & footer 에 정확한 값을 기입하고 index table 에 이 block 을 가리키는 index pointer 를 더함
+
+<br/>
+
+![image](https://user-images.githubusercontent.com/32635539/235462005-54b34726-d2e2-49a9-9746-4a18ac3652b5.png)
+
+- 만약 block space 가 너무 크다면, block 을 두 개로 쪼갬
+
+<br/>
+<br/>
+
+# Deallocation
+
+![image](https://user-images.githubusercontent.com/32635539/235462310-fd8204fd-815d-4ebe-978b-9614c92e7e19.png)
+
+- block 회수 시 hole을 병합
+
+- 회수된 block 양쪽 모두가 사용중이라면 병합할 수 없음
+
+
+
+
