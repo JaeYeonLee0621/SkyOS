@@ -4,14 +4,48 @@
 #include <hal.h>
 #include "SkyAPI.h"
 
+/*
 
-//ÀÎÅÍ·´Æ® µğ½ºÅ©¸³ÅÍ Å×ÀÌºí
+[IDT (Interput Descriptor Table)]
+- Software exception / Hardware interrupt ê°€ ë°œìƒí•˜ë©´ ì´ë¥¼ ì²˜ë¦¬í•˜ê¸° ìœ„í•œ Service Routine ì„ ê¸°ìˆ í•œ descriptor ëª¨ìŒ table
+
+ex) interrupt ë°œìƒ ì‹œ
+- CPU ëŠ” IDT ì—ì„œ interrupt descriptor ë¥¼ ì°¾ìŒ
+- descriptor ì—ëŠ” GDT ì˜ descriptor index
+- ì¦‰ segment selector ê°’ê³¼ segment ì˜ base address ì—ì„œ í•´ë‹¹ ISR (Interrupt Service Routing) ê¹Œì§€ì˜ offset ê°’ì´ ë“¤ì–´ìˆìŒ
+- ISR address =  offset ê°’ + GDT ì˜ descriptor ì—ì„œ ì–»ì€ segment base address 
+
+[Interrupt Service]
+- interrupt number = 0x1f ê¹Œì§€ëŠ” exception handler ë¥¼ ìœ„í•´ í• ë‹¹
+- 0x1f ë³´ë‹¤ í° ê°’ì€ software interrupt service routing ì„ ìœ„í•œ ë²ˆí˜¸
+
+[Interrupt ì¢…ë¥˜]
+
+> Hardware interrupt
+
+> Software interrupt
+
+- fault : exception interrupt ê°€ ë°œìƒí•˜ë©´ systemì´ ë§ê°€ì§€ì§€ ì•Šì•˜ë‹¤ê³  íŒë‹¨
+exception handler ìˆ˜í–‰ì´ ëë‚˜ë©´ ë‹¤ì‹œ ë³µê·€í•´ì„œ í•´ë‹¹ ì½”ë“œ ìˆ˜í–‰
+
+- abort : process ê°€ ë§ê°€ì ¸ì„œ system ì„ ë³µêµ¬í•  ìˆ˜ ì—†ìŒì„ ì˜ë¯¸
+ì´ëŸ° ê²½ìš° window OS ì—ì„œëŠ” process ë¥¼ ë” ì´ìƒ ìˆ˜í–‰ì‹œí‚¤ì§€ ì•Šê³  ì¢…ë£Œ
+
+- trap : Software interrupt ë¼ê³ ë„ í•˜ë©° ì˜ë„ì ìœ¼ë¡œ interrupt ë¥¼ ë°œìƒì‹œí‚¨ ê²½ìš°
+exception ì²˜ë¦¬ë¥¼ ìˆ˜í–‰í•˜ê³  ë‚˜ì„œ ë³µê·€í•  ê²½ìš° ì˜ˆì™¸ê°€ ë°œìƒí–ˆë˜ ëª…ë ¹ì–´ ë‹¤ìŒë¶€í„° ì½”ë“œ ì‹¤ìŸ
+
+*/
+
+
+// 256 ê°œì˜ interrupt descriptorê°€ ì¡´ì¬í•˜ë©° ì²˜ìŒ descriptor ëŠ” í•­ìƒ NULL ë¡œ ì„¤ì •
 static idt_descriptor	_idt [I86_MAX_INTERRUPTS];
 
-//CPUÀÇ IDTR ·¹Áö½ºÅÍ¸¦ ÃÊ±âÈ­ÇÏ´Âµ¥ µµ¿òÀ» ÁÖ´Â IDTR ±¸Á¶Ã¼
+// idtr register ì— load ë  ê°’
+// IDTì˜ memory address ë° IDT size ë¥¼ ë‹´ê³  ìˆìŒ
 static struct idtr				_idtr;
 
-//IDTR ·¹Áö½ºÅÍ¿¡ IDTÀÇ ÁÖ¼Ò°ªÀ» ³Ö´Â´Ù.
+
+// IDT ê°’ Register ì— ë“±ë¡
 static void IDTInstall() {
 #ifdef _MSC_VER
 	_asm lidt [_idtr]
@@ -31,9 +65,9 @@ __declspec(naked) void SendEOI()
 
 		; [EBP] < -EBP
 		; [EBP + 4] < -RET Addr
-		; [EBP + 8] < -IRQ ¹øÈ£
+		; [EBP + 8] < -IRQ ï¿½ï¿½È£
 
-		MOV AL, 20H; EOI ½ÅÈ£¸¦ º¸³½´Ù.
+		MOV AL, 20H; EOI ï¿½ï¿½È£ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
 		OUT DMA_PICU1, AL
 
 		CMP BYTE PTR[EBP + 8], 7
@@ -47,10 +81,10 @@ __declspec(naked) void SendEOI()
 	}
 }
 
-//´Ù·ê¼ö ÀÖ´Â ÇÚµé·¯°¡ Á¸ÀçÇÏÁö ¾ÊÀ»¶§ È£ÃâµÇ´Â ±âº» ÇÚµé·¯
+// ë‹¤ë£° ìˆ˜ ìˆëŠ” handler ê°€ ì¡´ì¬í•˜ì§€ ì•Šì„ ë•Œ í˜¸ì¶œë˜ëŠ” ê¸°ë³¸ handler
+// ì–´ë–¤ ìˆ˜í–‰ì„ ì•¡ì…˜ë„ ì·¨í•˜ì§€ ì•Šê³  handler ìˆ˜í–‰ì„ ëë‚´ëŠ” ì½”ë“œ
 __declspec(naked) void InterruptDefaultHandler () {
-	
-	//·¹Áö½ºÅÍ¸¦ ÀúÀåÇÏ°í ÀÎÅÍ·´Æ®¸¦ ²ö´Ù.
+	// register ë¥¼ ì €ì¥í•˜ê³  interrupt ë¥¼ ë”
 	_asm
 	{
 		PUSHAD
@@ -60,7 +94,7 @@ __declspec(naked) void InterruptDefaultHandler () {
 
 	SendEOI();
 
-	// ·¹Áö½ºÅÍ¸¦ º¹¿øÇÏ°í ¿ø·¡ ¼öÇàÇÏ´ø °÷À¸·Î µ¹¾Æ°£´Ù.
+	// register ë¥¼ ë³µì›í•˜ê³  ì›ë˜ ìˆ˜í–‰í•˜ë˜ ê³³ìœ¼ë¡œ ëŒì•„ê°
 	_asm
 	{
 		POPFD
@@ -70,7 +104,7 @@ __declspec(naked) void InterruptDefaultHandler () {
 }
 
 
-//i¹øÂ° ÀÎÅÍ·´Æ® µğ½ºÅ©¸³Æ®¸¦ ¾ò¾î¿Â´Ù.
+// íŠ¹ì • descriptor ê°’ì„ ì½ì–´ì˜´
 idt_descriptor* GetInterruptDescriptor(uint32_t i) {
 
 	if (i>I86_MAX_INTERRUPTS)
@@ -79,7 +113,7 @@ idt_descriptor* GetInterruptDescriptor(uint32_t i) {
 	return &_idt[i];
 }
 
-//ÀÎÅÍ·´Æ® ÇÚµé·¯ ¼³Ä¡
+// interrupt service routine ì„ ì„¤ì¹˜
 bool InstallInterrputHandler(uint32_t i, uint16_t flags, uint16_t sel, I86_IRQ_HANDLER irq) {
 
 	if (i>I86_MAX_INTERRUPTS)
@@ -88,7 +122,6 @@ bool InstallInterrputHandler(uint32_t i, uint16_t flags, uint16_t sel, I86_IRQ_H
 	if (!irq)
 		return false;
 
-	//ÀÎÅÍ·´Æ®ÀÇ º£ÀÌ½º ÁÖ¼Ò¸¦ ¾ò¾î¿Â´Ù.
 	uint64_t		uiBase = (uint64_t)&(*irq);
 	
 	if ((flags & 0x0500) == 0x0500) {
@@ -97,7 +130,6 @@ bool InstallInterrputHandler(uint32_t i, uint16_t flags, uint16_t sel, I86_IRQ_H
 	}
 	else
 	{
-		//Æ÷¸Ë¿¡ ¸Â°Ô ÀÎÅÍ·´Æ® ÇÚµé·¯¿Í ÇÃ·¡±× °ªÀ» µğ½ºÅ©¸³ÅÍ¿¡ ¼¼ÆÃÇÑ´Ù.
 		_idt[i].offsetLow = uint16_t(uiBase & 0xffff);
 		_idt[i].offsetHigh = uint16_t((uiBase >> 16) & 0xffff);
 		_idt[i].reserved = 0;
@@ -108,22 +140,24 @@ bool InstallInterrputHandler(uint32_t i, uint16_t flags, uint16_t sel, I86_IRQ_H
 	return	true;
 }
 
-//IDT¸¦ ÃÊ±âÈ­ÇÏ°í µğÆúÆ® ÇÚµé·¯¸¦ µî·ÏÇÑ´Ù
+
+// IDT ì´ˆê¸°í™”
 bool IDTInitialize(uint16_t codeSel) {
 
-	//IDTR ·¹Áö½ºÅÍ¿¡ ·ÎµåµÉ ±¸Á¶Ã¼ ÃÊ±âÈ­
+	// IDTR Register ì— load ë  structure ì´ˆê¸°í™”
 	_idtr.limit = sizeof(idt_descriptor) * I86_MAX_INTERRUPTS - 1;
 	_idtr.base = (uint32_t)&_idt[0];
 
-	//NULL µğ½ºÅ©¸³ÅÍ
+	// NULL descriptor
 	memset((void*)&_idt[0], 0, sizeof(idt_descriptor) * I86_MAX_INTERRUPTS - 1);
 
-	//µğÆúÆ® ÇÚµé·¯ µî·Ï
+	// default handler ë“±ë¡
+	// ì˜ˆì™¸ì— ëŒ€í•œ ê³ ìœ  handler ë¥¼ ë“±ë¡í•˜ì§€ ì•Šê³ , ëª¨ë“  ì˜ˆì™¸ì—ì„œ ê³µí†µì ìœ¼ë¡œ ì‚¬ìš©ë˜ëŠ” handler ë“±ë¡
 	for (int i = 0; i<I86_MAX_INTERRUPTS; i++)
 		InstallInterrputHandler(i, I86_IDT_DESC_PRESENT | I86_IDT_DESC_BIT32,
 			codeSel, (I86_IRQ_HANDLER)InterruptDefaultHandler);
 
-	//IDTR ·¹Áö½ºÅÍ¸¦ ¼Â¾÷ÇÑ´Ù
+	// IDTR register setup
 	IDTInstall();
 
 	return true;

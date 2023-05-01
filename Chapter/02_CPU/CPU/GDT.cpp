@@ -8,9 +8,21 @@
 #pragma pack (push, 1)
 #endif
 
+/*
+
+CPU ì—ê²Œ GDT ê°€ ì–´ë””ì— ìœ„ì¹˜í•˜ëŠ”ì§€ ì•Œë ¤ì¤˜ì•¼ í•¨
+GDTR Register ë¥¼ ì´ìš©í•´ì„œ GDT ì— ì ‘ê·¼ 
+- Assembly command : lgdt
+
+*/
+
 typedef struct tag_gdtr {
-	USHORT m_limit; // GDTÀÇ Å©±â
-	UINT m_base; // GDTÀÇ ½ÃÀÛ ÁÖ¼Ò
+
+	// GDT ì˜ í¬ê¸° : 2 byte
+	USHORT m_limit; 
+
+	// GDT ì˜ ì‹œì‘ ì£¼ì†Œ : 4 byte
+	UINT m_base;
 }gdtr;
 
 #ifdef _MSC_VER
@@ -26,6 +38,10 @@ static gdtr				_gdtr;
 
 //! install gdtr
 static void InstallGDT () {
+
+// lgdt : GDT register ì˜ì—­ì— í•´ë‹¹ GDTR structure ì„ ì–¸
+// _gdtr : ë³€ìˆ˜ì˜ physical address
+// paging ê¸°ëŠ¥ ì‹¤í–‰ ì‹œ virtual, physical address ê°€ ë‹¤ë¥´ê¸° ë•Œë¬¸ì— GDTR register ê°’ ì„¤ì •ì€ paging í™œì„±í™” ì „ì— ì„¤ì •
 #ifdef _MSC_VER
 	_asm lgdt [_gdtr]
 #endif
@@ -62,43 +78,71 @@ gdt_descriptor* i86_gdt_get_descriptor (int i) {
 	return &_gdt[i];
 }
 
-//GDT ÃÊ±âÈ­ ¹× GDTR ·¹Áö½ºÅÍ¿¡ GDT ·Îµå
+/*
+
+GDT ë¥¼ í†µí•´ ì£¼ì†Œë¥¼ ë³€í™˜í•˜ëŠ” ê³¼ì • = Segmentation
+Segmentation ê³¼ì • = ë…¼ë¦¬ ì£¼ì†Œ > ì„ í˜• ì£¼ì†Œ
+
+*/
+
 int GDTInitialize()
 {
-	//GDTR ·¹Áö½ºÅÍ¿¡ ·ÎµåµÉ _gdtr ±¸Á¶Ã¼ÀÇ °ª ÃÊ±âÈ­
-	//_gdtr ±¸Á¶Ã¼ÀÇ ÁÖ¼Ò´Â ÆäÀÌÂ¡ Àü´Ü°èÀÌ¸ç ½ÇÁ¦ ¹°¸®ÁÖ¼Ò¿¡ ÇØ´ç º¯¼ö°¡ ÇÒ´çµÇ¾î ÀÖ´Ù.
-	//µğ½ºÅ©¸³ÅÍÀÇ ¼ö¸¦ ³ªÅ¸³»´Â MAX_DESCRIPTORSÀÇ °ªÀº 5ÀÌ´Ù.
-	//NULL µğ½ºÅ©¸³ÅÍ, Ä¿³Î ÄÚµå µğ½ºÅ©¸³ÅÍ, Ä¿³Î µ¥ÀÌÅÍ µğ½ºÅ©¸³ÅÍ, À¯Àú ÄÚµå µğ½ºÅ©¸³ÅÍ
-	//À¯Àú µ¥ÀÌÅÍ µğ½ºÅ©¸³ÅÍ ÀÌ·¸°Ô ÃÑ 5°³ÀÌ´Ù.
-	//µğ½ºÅ©¸³ÅÍ´ç 6¹ÙÀÌÆ®ÀÌ¹Ç·Î GDTÀÇ Å©±â´Â 30¹ÙÀÌÆ®´Ù.
+	/*
+
+	GDT Register ì— load ë  _gdtr ê°’ ì´ˆê¸°í™”
+	_gdtr ì˜ Address ëŠ” ì‹¤ì œ Physical Address ì— í•´ë‹¹
+	5 ê°œì˜ descriptor = NULL descriptor, kernel code descriptor, kernel data descriptor, user code descriptor, user data descriptor
+	descriptor ë‹¹ 8byte ì´ë¯€ë¡œ GDT ì˜ í¬ê¸°ëŠ” 40 byte
+
+	*/
+
 	_gdtr.m_limit = (sizeof(struct gdt_descriptor) * MAX_DESCRIPTORS) - 1;
 	_gdtr.m_base = (uint32_t)&_gdt[0];
 
-	//NULL µğ½ºÅ©¸³ÅÍÀÇ ¼³Á¤
+	// NULL descriptor : descriptor ë‚´ì˜ ì²« ë²ˆì§¸ descriptor ëŠ” í•­ìƒ NULL ë¡œ ì„¤ì •
 	gdt_set_descriptor(0, 0, 0, 0, 0);
 
-	//Ä¿³Î ÄÚµå µğ½ºÅ©¸³ÅÍÀÇ ¼³Á¤
+	// ëª¨ë“  segment ì£¼ì†ŒëŠ” 0 ì—ì„œ 32bit ì¸ 0xffffffff
+	
+	/*
+	+) 32 bit address ëŠ” ì™œ 4GB ì˜ ë°ì´í„°ë¥¼ í‘œí˜„í•  ìˆ˜ ìˆì„ê¹Œ?
+
+	2^32 = 4294967296 ê°œì˜ Address ì‚¬ìš© ê°€ëŠ¥
+	í•œ ê°œì˜ address ë‹¹ 1byte ë°ì´í„° ì €ì¥ ê°€ëŠ¥
+
+	ë”°ë¼ì„œ 4294967296 * byte = 4GB
+	*/
+
+	// kernel code descriptor : kernel code ì‹¤í–‰ ì‹œ ì ‘ê·¼ ê¶Œí•œì„ ê¸°ìˆ í•œ descriptor
 	gdt_set_descriptor(1, 0, 0xffffffff,
 		I86_GDT_DESC_READWRITE | I86_GDT_DESC_EXEC_CODE | I86_GDT_DESC_CODEDATA |
 		I86_GDT_DESC_MEMORY, I86_GDT_GRAND_4K | I86_GDT_GRAND_32BIT |
 		I86_GDT_GRAND_LIMITHI_MASK);
 
-	//Ä¿³Î µ¥ÀÌÅÍ µğ½ºÅ©¸³ÅÍÀÇ ¼³Á¤
+	// kernel data descriptor : kernel data ì˜ì—­ì— data ë¥¼ ì“°ê±°ë‚˜ ì½ì„ ë•Œ ì ‘ê·¼ ê¶Œí•œì„ ê¸°ìˆ í•œ descriptor
+
+	/*
+	I86_GDT_DESC_CODEDATA : CODE ë‚˜ Data Segment
+	I86_GDT_DESC_MEMORY : Memory ìƒì„¸ Segment ê°€ ì¡´ì¬ ê°€ëŠ¥
+	I86_GDT_GRAND_4K : Segment Address ëŠ” 20bit ì§€ë§Œ 4GB Address ê¹Œì§€ ì£¼ì†Œ ì ‘ê·¼ ê°€ëŠ¥
+	I86_GDT_GRAND_32BIT : Segment ëŠ” 32bit code ë¥¼ ë‹´ê³  ìˆìŒ
+	*/
 	gdt_set_descriptor(2, 0, 0xffffffff,
 		I86_GDT_DESC_READWRITE | I86_GDT_DESC_CODEDATA | I86_GDT_DESC_MEMORY,
 		I86_GDT_GRAND_4K | I86_GDT_GRAND_32BIT | I86_GDT_GRAND_LIMITHI_MASK);
 
-	//À¯Àú¸ğµå µğ½ºÅ©¸³ÅÍÀÇ ¼³Á¤
+	// user code descriptor : user code ì‹¤í–‰ ì‹œ ì ‘ê·¼ ê¶Œí•œì„ ê¸°ìˆ í•œ descriptor
+	// I86_GDT_DESC_EXEC_CODE : Code segment ì¼ ë•Œì—ë§Œ ì‹¤í–‰ ê°€ëŠ¥
 	gdt_set_descriptor(3, 0, 0xffffffff,
 		I86_GDT_DESC_READWRITE | I86_GDT_DESC_EXEC_CODE | I86_GDT_DESC_CODEDATA |
 		I86_GDT_DESC_MEMORY | I86_GDT_DESC_DPL, I86_GDT_GRAND_4K | I86_GDT_GRAND_32BIT |
 		I86_GDT_GRAND_LIMITHI_MASK);
 
-	//À¯Àú¸ğµå µ¥ÀÌÅÍ µğ½ºÅ©¸³ÅÍÀÇ ¼³Á¤
+	// user data descriptor : user data ì˜ì—­ì— ì ‘ê·¼í•  ì‹œ ì ‘ê·¼ ê¶Œí•œì„ ê¸°ìˆ í•œ descriptor
 	gdt_set_descriptor(4, 0, 0xffffffff, I86_GDT_DESC_READWRITE | I86_GDT_DESC_CODEDATA | I86_GDT_DESC_MEMORY | I86_GDT_DESC_DPL,
 		I86_GDT_GRAND_4K | I86_GDT_GRAND_32BIT | I86_GDT_GRAND_LIMITHI_MASK);
 
-	//GDTR ·¹Áö½ºÅÍ¿¡ GDT ·Îµå
+	// GDTR Register ì— GDT load
 	InstallGDT();
 
 	return 0;

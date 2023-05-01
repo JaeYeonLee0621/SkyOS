@@ -33,13 +33,13 @@
 
 #define DEFAULT_HEAP_PAGE_COUNT 256
 
-#define TASK_STATE_INIT		0 //еб╫╨е╘╟║ цй╠Бх╜╣х ╩Себ
-#define TASK_STATE_WAIT		1 //╫ггЮю╩ ю╖гь ╢К╠Баъюн ╩Себ
-#define TASK_STATE_RUNNING	2 //еб╫╨е╘╟║ ╫ггЮаъюн ╩Себ
-#define TASK_STATE_SLEEP	3 //еб╫╨е╘╟║ еб╫╨е╘ ╫╨диаЛ╥╞©║╪╜ а╕©э╣х ╩Себ
-#define TASK_STATE_END		4 //еб╫╨е╘╟║ а╬╥А╣х ╩Себ   
+#define TASK_STATE_INIT		0 //О©╫б╫О©╫е╘О©╫О©╫ О©╫й╠О©╫х╜О©╫О©╫ О©╫О©╫О©╫О©╫
+#define TASK_STATE_WAIT		1 //О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫
+#define TASK_STATE_RUNNING	2 //О©╫б╫О©╫е╘О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫
+#define TASK_STATE_SLEEP	3 //О©╫б╫О©╫е╘О©╫О©╫ О©╫б╫О©╫е╘ О©╫О©╫О©╫О©╫О©╫Л╥╞О©╫О©╫О©╫О©╫ О©╫О©╫О©╫э╣О©╫ О©╫О©╫О©╫О©╫
+#define TASK_STATE_END		4 //О©╫б╫О©╫е╘О©╫О©╫ О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫   
 
-#define TASK_RUNNING_TIME 4   //еб╫╨е╘╟║ CPU╦╕ ╩Г©Кго╢б ╫ц╟ё
+#define TASK_RUNNING_TIME 4   //О©╫б╫О©╫е╘О©╫О©╫ CPUО©╫О©╫ О©╫О©╫О©╫О©╫о╢О©╫ О©╫ц╟О©╫
 
 //! set access bit
 #define I86_GDT_DESC_ACCESS			0x0001			//00000001

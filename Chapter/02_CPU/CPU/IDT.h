@@ -3,10 +3,6 @@
 #include <stdint.h>
 #include "windef.h"
 
-//Interrupt Descriptor Table : IDT´Â ÀÎÅÍ·´Æ®¸¦ ´Ù·ç´Â ÀÎÅÍÆäÀÌ½º¸¦ Á¦°øÇÒ Ã¥ÀÓÀÌ ÀÖ´Ù.
-//ÀÎÅÍÆäÀÌ½º ¼³Ä¡, ¿äÃ», ±×¸®°í ÀÎÅÍ·´Æ®¸¦ Ã³¸®ÇÏ´Â Äİ¹é ·çÆ¾
-
-//ÀÎÅÍ·´Æ® ÇÚµé·¯ÀÇ ÃÖ´ë °³¼ö : 256
 #define I86_MAX_INTERRUPTS		256
 
 #define I86_IDT_DESC_BIT16		0x06	//00000110
@@ -16,42 +12,56 @@
 #define I86_IDT_DESC_RING3		0x60	//01100000
 #define I86_IDT_DESC_PRESENT	0x80	//10000000
 
-//ÀÎÅÍ·´Æ® ÇÚµé·¯ Á¤ÀÇ ÇÔ¼ö
-//ÀÎÅÍ·´Æ® ÇÚµé·¯´Â ÇÁ·Î¼¼¼­°¡ È£ÃâÇÑ´Ù. ÀÌ¶§ ½ºÅÃ ±¸¼ºÀÌ º¯ÇÏ´Âµ¥
-//ÀÎÅÍ·´Æ®¸¦ Ã³¸®ÇÏ°í ¸®ÅÏÇÒ¶§ ½ºÅÃÀÌ ÀÎÅÍ·´Æ® ÇÚµé·¯ È£ÃâÁ÷ÀüÀÇ ±¸¼º°ú ¶È°°À½À» º¸ÀåÇØ¾ß ÇÑ´Ù.
 typedef void (_cdecl *I86_IRQ_HANDLER)(void);
 
 #ifdef _MSC_VER
 #pragma pack (push, 1)
 #endif
 
-//IDTR ±¸Á¶Ã¼
+/*
+
+IDT ì˜ ìœ„ì¹˜ë¥¼ CPU ì— ì•Œë ¤ì£¼ê¸° ìœ„í•´ IDTR structure ë¥¼ ìƒì„±
+CPU ëŠ” IDTR register ë¥¼ í†µí•´ IDT ì— ì ‘ê·¼
+
+*/
+
 struct idtr {
 
-	//IDTÀÇ Å©±â
 	uint16_t limit;
 
-	//IDTÀÇ º£ÀÌ½º ÁÖ¼Ò
 	uint32_t base;
 };
 
+/*
+
+í¬ê¸° = 8byte
+
+offsetLow, offsetHigh ë¥¼ ì´ìš©í•´ì„œ ISR 4byte offset ê°’ì„ ì–»ì–´ë‚¼ ìˆ˜ ìˆìŒ
+selector ë¥¼ ì´ìš©í•´ì„œ GDT descriptor ë¥¼ ì°¾ì•„ì„œ segment base address ë¥¼ ì–»ì–´ë‚¼ ìˆ˜ ìˆìŒ
+
+*/
+
 typedef struct tag_idt_descriptor
 {
-	USHORT offsetLow; //ÀÎÅÍ·´Æ® ÇÚµé·¯ ÁÖ¼ÒÀÇ 0-16 ºñÆ®
-	USHORT selector; //GDTÀÇ ÄÚµå ¼¿·ºÅÍ
-	BYTE reserved; //¿¹¾àµÈ °ª 0ÀÌ¾î¾ß ÇÑ´Ù.
-	BYTE flags; //8ºñÆ® ºñÆ® ÇÃ·¡±×
-	USHORT offsetHigh; //ÀÎÅÍ·´Æ® ÇÚµé·¯ ÁÖ¼ÒÀÇ 16-32 ºñÆ®
+	USHORT offsetLow; // interrupt handler address : 0-16ã… ã…‘ã……
+
+	// 2byte : GDT ë‚´ global descriptor ë¥¼ ì°¾ì„ ìˆ˜ ìˆìŒ
+	// ì´ë¥¼ í†µí•´ Segment base address ë¥¼ ì–»ì–´ë‚¼ ìˆ˜ ìˆìŒ
+	// ì—¬ê¸°ì— offset ê°’ì„ ë”í•´ì„œ ISR ì£¼ì†Œë¥¼ ì–»ì„ ìˆ˜ ìˆìŒ
+	USHORT selector;
+
+	BYTE reserved; // ì˜ˆì•½ëœ ê°’ 0
+	BYTE flags; // 8bit bit flag
+	USHORT offsetHigh; // interrupt handler address ì˜ 16~32bit
+
 }idt_descriptor;
 
 #ifdef _MSC_VER
 #pragma pack (pop)
 #endif
 
-//i¹øÂ° ÀÎÅÍ·´Æ® µğ½ºÅ©¸³Æ®¸¦ ¾ò¾î¿Â´Ù.
 extern idt_descriptor* GetInterruptDescriptor(uint32_t i);
 
-//ÀÎÅÍ·´Æ® ÇÚµé·¯ ¼³Ä¡.
 extern bool InstallInterrputHandler(uint32_t i, uint16_t flags, uint16_t sel, I86_IRQ_HANDLER);
 extern bool IDTInitialize(uint16_t codeSel);
 

@@ -55,6 +55,24 @@
 //! gdt descriptor. A gdt descriptor defines the properties of a specific
 //! memory block and permissions.
 
+/*
+
+[GDT (Global Descriptor Table)]
+- CPU 보호 모드 기능을 사용하기 위해 OS 개발자가 작성 해야 하는 테이블
+- 물리 메모리에 직접 접근해서 데이터를 읽거나 쓰는 행위가 불가능
+- GDT 를 거쳐서 조건에 맞으면 가져와 실행, 그렇지 않으면 예외
+- descriptor 는 8byte 구조체
+
+검증 조건
+- 접근하려는 주소가 유효한 주소 범위 내에 있는지 여부
+- 현재 실행되는 스레드의 특권 레벨이 GDT 에 기술된 특권 레벨과 같거나 높은지
+
+[DPL (특권 레벨)]
+- 다른 말로는 링레벨이라고 함
+
+*/
+
+// GDT descriptor 는 8byte
 struct gdt_descriptor {
 
 	//! bits 0-15 of segment limit

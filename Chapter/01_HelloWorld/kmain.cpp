@@ -79,9 +79,33 @@ _declspec(naked) void multiboot_entry(void)
 	}
 }
 
+/*
+
+GRUB 를 활용하면 Global object 를 사용하지 않을 것이므로 문제가 되지 않지만
+직접 Kernel Loader 를 구현해서 Global object 를 사용한다면
+Global object initializing routine 을 구현해야 함
+
+*/
 void InitializeConstructor()
 {
-	//내부 구현은 나중에 추가한다.
+	// Global 및 정적 object initializing code
+	// GRUB 사용 시 생성하지 않아도 괜찮음
+	_atexit_init();
+	_initterm(__xc_a, __xc_z);
+}
+
+void __cdecl _initterm (_PVFV * pfbegin, _PVFV * pfend)
+{
+	// 초기화 테이블이 마지막에 도달하지 않았다면 loop
+	while (pfbegin < pfend)
+	{
+		// 객체 초기화 코드 실행
+		if (*pfbegin != 0)
+			(**pfbegin)();
+		
+		// 다음 초기화 테이블에서 다음 초기화 객체를 찾음
+		++pfbegin;
+	}
 }
 
 void kmain(unsigned long magic, unsigned long addr)
